@@ -1,0 +1,59 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Happimeter", "Happimeter\Happimeter\Happimeter.shproj", "{6117066B-C59C-4FC1-B57E-063E41318038}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Happimeter.Android", "Happimeter\Happimeter.Android\Happimeter.Android.csproj", "{2D94A0CD-7510-4F46-961B-4954674D6026}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Happimeter.iOS", "Happimeter\Happimeter.iOS\Happimeter.iOS.csproj", "{07437CEF-2432-44C6-93CF-2015701C8E52}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Happimeter\Happimeter\Happimeter.projitems*{07437cef-2432-44c6-93cf-2015701c8e52}*SharedItemsImports = 4
+		Happimeter\Happimeter\Happimeter.projitems*{2d94a0cd-7510-4f46-961b-4954674d6026}*SharedItemsImports = 4
+		Happimeter\Happimeter\Happimeter.projitems*{6117066b-c59c-4fc1-b57e-063e41318038}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|iPhone = Debug|iPhone
+		Debug|iPhoneSimulator = Debug|iPhoneSimulator
+		Release|Any CPU = Release|Any CPU
+		Release|iPhone = Release|iPhone
+		Release|iPhoneSimulator = Release|iPhoneSimulator
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Debug|iPhone.Deploy.0 = Debug|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Debug|iPhoneSimulator.Deploy.0 = Debug|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Release|iPhone.Build.0 = Release|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Release|iPhone.Deploy.0 = Release|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{2D94A0CD-7510-4F46-961B-4954674D6026}.Release|iPhoneSimulator.Deploy.0 = Release|Any CPU
+		{07437CEF-2432-44C6-93CF-2015701C8E52}.Debug|Any CPU.ActiveCfg = Debug|iPhone
+		{07437CEF-2432-44C6-93CF-2015701C8E52}.Debug|iPhone.ActiveCfg = Debug|iPhone
+		{07437CEF-2432-44C6-93CF-2015701C8E52}.Debug|iPhone.Build.0 = Debug|iPhone
+		{07437CEF-2432-44C6-93CF-2015701C8E52}.Debug|iPhoneSimulator.ActiveCfg = Debug|iPhoneSimulator
+		{07437CEF-2432-44C6-93CF-2015701C8E52}.Debug|iPhoneSimulator.Build.0 = Debug|iPhoneSimulator
+		{07437CEF-2432-44C6-93CF-2015701C8E52}.Release|Any CPU.ActiveCfg = Release|iPhone
+		{07437CEF-2432-44C6-93CF-2015701C8E52}.Release|iPhone.ActiveCfg = Release|iPhone
+		{07437CEF-2432-44C6-93CF-2015701C8E52}.Release|iPhone.Build.0 = Release|iPhone
+		{07437CEF-2432-44C6-93CF-2015701C8E52}.Release|iPhoneSimulator.ActiveCfg = Release|iPhoneSimulator
+		{07437CEF-2432-44C6-93CF-2015701C8E52}.Release|iPhoneSimulator.Build.0 = Release|iPhoneSimulator
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
