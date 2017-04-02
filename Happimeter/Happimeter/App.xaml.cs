@@ -21,9 +21,9 @@ namespace Happimeter
             {
                 Children =
                 {
-                    new NavigationPage(new AboutPage())
+                    new NavigationPage(new RecordingPage())
                     {
-                        Title = "About",
+                        Title = "Speech Analyzer",
                         Icon = Device.OnPlatform<string>("tab_about.png",null,null)
                     },
                 }

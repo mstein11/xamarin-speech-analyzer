@@ -1,7 +1,5 @@
 ﻿using System;
-using System.IO;
-using AVFoundation;
-using Foundation;
+using AudioToolbox;
 using Happimeter.Services;
 using Xamarin.Forms;
 
@@ -10,129 +8,93 @@ namespace Happimeter.iOS.Services
 {
     public class AudioRecorder : IRecorderService
     {
-        private NSDictionary _settings;
-        private string _path;
-        private NSUrl _url;
-        private NSError _error;
-        private AVAudioRecorder _recorder;
+        private int _bufferCount = 3;
+        private int _sampleRate = 8000;
+        private int _audioBufferSize = 8000;
+     
+        private Action<byte[]> Callback { get; set; }
+        private InputAudioQueue AudioQueue { get; set; }
         private bool _isRecord;
-        private AVAudioSession Session { get; set; }
 
-        public bool Initialize()
+        public bool Initialize(Action<byte[]> callback = null)
         {
-            Session = AVAudioSession.SharedInstance();
-            var err = Session.SetCategory(AVAudioSessionCategory.Record);
-
-            if (err != null)
+            Callback = callback;
+            var recordFormat = new AudioStreamBasicDescription()
             {
-                Console.WriteLine("audioSession: {0}", err);
-
-            }
-            err = Session.SetActive(true);
-            if (err != null)
-            {
-                Console.WriteLine("audioSession: {0}", err);
-
-            }
-
-            //Declare string for application temp path and tack on the file extension
-            
-
-
-            //set up the NSObject Array of values that will be combined with the keys to make the NSDictionary
-            NSObject[] values = new NSObject[]
-            {
-                NSNumber.FromFloat (44100.0f), //Sample Rate
-                NSNumber.FromInt32 ((int)AudioToolbox.AudioFormatType.LinearPCM), //AVFormat
-                NSNumber.FromInt32 (2), //Channels
-                NSNumber.FromInt32 (16), //PCMBitDepth
-                NSNumber.FromBoolean (false), //IsBigEndianKey
-                NSNumber.FromBoolean (false) //IsFloatKey
+                SampleRate = _sampleRate,
+                Format = AudioFormatType.LinearPCM,
+                FormatFlags = AudioFormatFlags.LinearPCMIsSignedInteger | AudioFormatFlags.LinearPCMIsPacked,
+                FramesPerPacket = 1,
+                ChannelsPerFrame = 1,
+                BitsPerChannel = 16,
+                BytesPerPacket = 2,
+                BytesPerFrame = 2,
+                Reserved = 0,
             };
+            AudioQueue = new InputAudioQueue(recordFormat);
+            AudioQueue.InputCompleted += HandleInputCompleted;
+            var bufferByteSize = _audioBufferSize * recordFormat.BytesPerPacket;
 
-            //Set up the NSObject Array of keys that will be combined with the values to make the NSDictionary
-            NSObject[] keys = new NSObject[]
+            for (var count = 0; count < _bufferCount; count++)
             {
-                AVAudioSettings.AVSampleRateKey,
-                AVAudioSettings.AVFormatIDKey,
-                AVAudioSettings.AVNumberOfChannelsKey,
-                AVAudioSettings.AVLinearPCMBitDepthKey,
-                AVAudioSettings.AVLinearPCMIsBigEndianKey,
-                AVAudioSettings.AVLinearPCMIsFloatKey
-            };
-
-            //Set Settings with the Values and Keys to create the NSDictionary
-            _settings = NSDictionary.FromObjectsAndKeys(values, keys);
-            SetOutputPath();
-            //Set recorder parameters
-            _recorder = AVAudioRecorder.Create(_url, new AudioSettings(_settings), out _error);
-
-            //Set Recorder to Prepare To Record
-            var tmp = _recorder.PrepareToRecord();
-
-            return tmp;
-        }
-        public void SetOutputFormat(string format)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void SetAudioEncoder(string encoder)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void SetOutputPath(string path = "")
-        {
-            if (path.Length == 0)
-            {
-                path = Path.GetTempPath();
+                IntPtr bufferPointer;
+                AudioQueue.AllocateBuffer(bufferByteSize, out bufferPointer);
+                AudioQueue.EnqueueBuffer(bufferPointer, _audioBufferSize, null);
             }
 
-            string fileName = string.Format("audio{0}.wav", DateTime.Now.ToString("yyyyMMddHHmmss"));
-            string audioFilePath = Path.Combine(path, fileName);
+            return true;
+        }
 
-            Console.WriteLine("Audio File Path: " + audioFilePath);
-            _path = audioFilePath;
-            _url = NSUrl.FromFilename(audioFilePath);
+        private void HandleInputCompleted(object sender, InputCompletedEventArgs e)
+        {
+            if (!_isRecord)
+            {
+                return;
+            }
+
+            var buffer = (AudioQueueBuffer)System.Runtime.InteropServices.Marshal.PtrToStructure(e.IntPtrBuffer, typeof(AudioQueueBuffer));
+            if (Callback != null)
+            {
+                var send = new byte[buffer.AudioDataByteSize];
+                System.Runtime.InteropServices.Marshal.Copy(buffer.AudioData, send, 0, (int) buffer.AudioDataByteSize);
+
+                Callback(send);
+            }
+
+            var status = AudioQueue.EnqueueBuffer(e.IntPtrBuffer, _audioBufferSize, e.PacketDescriptions);
+            if (status != AudioQueueStatus.Ok)
+            {
+                // todo: 
+            }
         }
 
         public bool Start()
         {
-            if (_recorder == null || _isRecord)
+            if (AudioQueue == null || _isRecord)
             {
                 return false;
             }
 
-            _recorder.Record();
-            _isRecord = true;
-            return true;
+            var status = AudioQueue.Start();
+
+            if (status == AudioQueueStatus.Ok)
+            {
+                _isRecord = true;
+            }
+            
+            return _isRecord;
         }
 
-        public byte[] Stop()
+        public void Stop()
         {
-            if (_recorder == null || !_isRecord)
+            if (AudioQueue == null || !_isRecord)
             {
-                return default(byte[]);
+                return;
             }
 
-            _recorder.Stop();
+            //leave time to flush buffer, not stop immediatly
+            AudioQueue.Stop(false);
             _isRecord = false;
-
-
-            byte[] bytes;
-            using (var streamReader = new StreamReader(_path))
-            {
-                using (var memstream = new MemoryStream())
-                {
-                    streamReader.BaseStream.CopyTo(memstream);
-                    bytes = memstream.ToArray();
-                }
-            }
-
-            File.Delete(_path);
-
-            return bytes;
 
         }
 

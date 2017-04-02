@@ -6,15 +6,10 @@ namespace Happimeter.Services
 {
     public interface IRecorderService
     {
-        bool Initialize();
+        bool Initialize(Action<byte[]> callback = null);
         bool IsRunning();
-        void SetOutputFormat(string format);
-        void SetAudioEncoder(string encoder);
-        void SetOutputPath(string path);
 
         bool Start();
-        byte[] Stop();
-
-
+        void Stop();
     }
 }

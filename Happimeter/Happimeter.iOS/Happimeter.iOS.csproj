@@ -92,6 +92,8 @@
     <MtouchHttpClientHandler>HttpClientHandler</MtouchHttpClientHandler>
     <MtouchTlsProvider>Default</MtouchTlsProvider>
     <PlatformTarget>x86</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodesignProvision>55c0cc18-a55b-4dcb-8bbf-c783d050390e</CodesignProvision>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
