@@ -26,6 +26,11 @@ namespace Happimeter
                         Title = "Speech Analyzer",
                         Icon = Device.OnPlatform<string>("tab_about.png",null,null)
                     },
+                    new NavigationPage(new TurnTakingPage())
+                    {
+                        Title = "Turn Taking",
+                        Icon = Device.OnPlatform<string>("tab_about.png",null,null)
+                    },
                 }
             };
         }

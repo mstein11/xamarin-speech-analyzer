@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Windows.Input;
+using Happimeter.Models;
 using Happimeter.Services;
 using Xamarin.Forms;
 
 namespace Happimeter.ViewModels
 {
 	public class RecordingPageViewModel : BaseViewModel
-	{
-        private IRecorderService RecordService { get; set; }
+	{ 
+        private IAudioAnalyzerService AudioAnalyzerService { get; set; }
 
         /// <summary>
         /// Private backing field to hold the title
@@ -26,10 +27,6 @@ namespace Happimeter.ViewModels
         /// Private backing field to hold the title
         /// </summary>
         string _averageSpeechEnergy = "-";
-
-	    private double _sumOfReportedEnergy = 0;
-
-	    private int _numberOfReports = 0;
 
         /// <summary>
         /// Public property to set and get the title of the item
@@ -56,8 +53,8 @@ namespace Happimeter.ViewModels
         public RecordingPageViewModel()
 		{
 			Title = "Speech Analyzer";
-            RecordService = DependencyService.Get<IRecorderService>();
-		    RecordService.Initialize(UpdateSpeechEnergy);
+		    AudioAnalyzerService = DependencyService.Get<IAudioAnalyzerService>();
+		    AudioAnalyzerService.OnProcessAudioUpdate += UpdateSpeechEnergy;
 			OpenWebCommand = new Command(ToggleRecord);
 		}
 
@@ -66,40 +63,35 @@ namespace Happimeter.ViewModels
 		/// </summary>
 		public ICommand OpenWebCommand { get; }
 
+	    public ICommand ScanNetworkCommand
+	    {
+	        get { return new Command(() =>
+	        {
+
+	        }); }
+	    }
+
 	    private void ToggleRecord()
 	    {
-	        if (!RecordService.IsRunning())
+	        if (!AudioAnalyzerService.IsRunning())
 	        {
-	            _sumOfReportedEnergy = 0;
-	            _numberOfReports = 0;
 	            ButtonText = "Stop Recording";
-                RecordService.Start();
+                AudioAnalyzerService.Start();
 	        }
 	        else
 	        {
                 ButtonText = "Start Recording";
-                RecordService.Stop();
+                AudioAnalyzerService.Stop();
 	        }
 	    }
 
-	    private void UpdateSpeechEnergy(byte[] data)
-	    {
-            long totalSquare = 0;
-            for (int i = 0; i < data.Length; i += 2)
-            {
-                short sample = (short)(data[i] | (data[i + 1] << 8));
-                totalSquare += sample * sample;
-            }
-            long meanSquare = 2 * totalSquare / data.Length;
-            double rms = Math.Sqrt(meanSquare);
-            double volume = rms / 32768.0;
-	        var upscaledVolumen = (volume * 1000);
+	    private void UpdateSpeechEnergy(AnalyzedAudioModel model)
+	    {            
+	        var upscaledVolumen = (model.SpeechEnergyLastSample * 1000);
+	        var averageUpscaledVolume = (model.SpeechEnergyLastMinute * 1000);
             SpeachEnergy = upscaledVolumen.ToString("N4");
-
-	        _sumOfReportedEnergy += upscaledVolumen;
-	        _numberOfReports++;
-
-	        AverageSpeechEnergy = (_sumOfReportedEnergy / _numberOfReports).ToString("N4");
+            
+	        AverageSpeechEnergy = averageUpscaledVolume.ToString("N4");
 	    }
 	}
 }

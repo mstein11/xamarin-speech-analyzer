@@ -10,6 +10,9 @@
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)App.xaml" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Views\TurnTakingPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Views\RecordingPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
@@ -27,8 +30,20 @@
     <Compile Include="$(MSBuildThisFileDirectory)App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)DataStructures\SlidingBuffer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\AsyncExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\AnalyzedAudioModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\BaseDataObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\RecordingSampleModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\TurnTakingMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\AudioAnalyzerService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\IAudioAnalyzerService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\INetworkService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\IRecorderService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\ITurnTakingService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\NetworkService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\TurnTakingService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\TurnTakingPageViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Views\RecordingPage.xaml.cs">
       <DependentUpon>RecordingPage.xaml</DependentUpon>
     </Compile>
@@ -51,9 +66,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Views\NewItemPage.xaml.cs">
       <DependentUpon>NewItemPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Views\TurnTakingPage.xaml.cs">
+      <DependentUpon>TurnTakingPage.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)ViewModels\" />
     <Folder Include="$(MSBuildThisFileDirectory)Helpers\" />
   </ItemGroup>
 </Project>

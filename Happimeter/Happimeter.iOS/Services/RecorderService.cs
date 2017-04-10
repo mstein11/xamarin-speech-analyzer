@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using AudioToolbox;
+using Foundation;
+using Happimeter.Models;
 using Happimeter.Services;
 using Xamarin.Forms;
 
@@ -11,7 +14,9 @@ namespace Happimeter.iOS.Services
         private int _bufferCount = 3;
         private int _sampleRate = 8000;
         private int _audioBufferSize = 8000;
-     
+
+        private DateTime LastDateTime = DateTime.MinValue;
+
         private Action<byte[]> Callback { get; set; }
         private InputAudioQueue AudioQueue { get; set; }
         private bool _isRecord;
@@ -31,7 +36,10 @@ namespace Happimeter.iOS.Services
                 BytesPerFrame = 2,
                 Reserved = 0,
             };
-            AudioQueue = new InputAudioQueue(recordFormat);
+
+                AudioQueue = new InputAudioQueue(recordFormat);
+
+
             AudioQueue.InputCompleted += HandleInputCompleted;
             var bufferByteSize = _audioBufferSize * recordFormat.BytesPerPacket;
 
@@ -53,12 +61,22 @@ namespace Happimeter.iOS.Services
             }
 
             var buffer = (AudioQueueBuffer)System.Runtime.InteropServices.Marshal.PtrToStructure(e.IntPtrBuffer, typeof(AudioQueueBuffer));
-            if (Callback != null)
+            if (OnReceiveSampleEvent != null)
             {
                 var send = new byte[buffer.AudioDataByteSize];
                 System.Runtime.InteropServices.Marshal.Copy(buffer.AudioData, send, 0, (int) buffer.AudioDataByteSize);
 
-                Callback(send);
+                var curretnTime = DateTime.UtcNow;
+                Debug.WriteLine(curretnTime - LastDateTime);
+                LastDateTime = curretnTime;
+
+                var model = new RecordingSampleModel
+                {
+                    AudioData = send,
+                    TimeStamp = DateTime.UtcNow
+                };
+
+                OnReceiveSampleEvent?.Invoke(model);
             }
 
             var status = AudioQueue.EnqueueBuffer(e.IntPtrBuffer, _audioBufferSize, e.PacketDescriptions);
@@ -67,6 +85,8 @@ namespace Happimeter.iOS.Services
                 // todo: 
             }
         }
+
+        public event Action<RecordingSampleModel> OnReceiveSampleEvent;
 
         public bool Start()
         {
