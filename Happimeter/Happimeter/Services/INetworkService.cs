@@ -10,7 +10,7 @@ namespace Happimeter.Services
         void SendMessages(TurnTakingMessage message);
         void Dispose();
 
-        void Start();
+        void Start(string groupName = null);
         void Stop();
         bool IsRunning();
     }

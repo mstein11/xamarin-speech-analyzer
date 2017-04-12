@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -39,7 +40,7 @@ namespace Happimeter.Services
                 AudioTimeStamp = model.TimeStamp,
                 Id = Guid.NewGuid(),
                 Volumne = model.SpeechEnergyLastSample,
-                IpAdress = _currentIpAddress
+                UserId = _currentIpAddress
             };
             NetworkService.SendMessages(turnTakingModel);
             _mine.Add(turnTakingModel);
@@ -47,7 +48,8 @@ namespace Happimeter.Services
 
         private void GetFromNetwork()
         {
-            var messagesGrouped = NetworkService.GetMessages().GroupBy(x => x.IpAdress);
+            _fromNetwork = new ConcurrentDictionary<string, SlidingBuffer<TurnTakingMessage>>();
+            var messagesGrouped = NetworkService.GetMessages().GroupBy(x => x.UserId);
 
             foreach (var messageGroup in messagesGrouped.ToList())
             {
@@ -72,14 +74,7 @@ namespace Happimeter.Services
 
                 var referenceTime = DateTime.UtcNow;
 
-                var mineClosest =
-                    _mine.Select(x => new {timeDiff = referenceTime- x.AudioTimeStamp, model = x})
-                        .OrderBy(x => x.timeDiff).FirstOrDefault();
 
-                if (mineClosest == null)
-                {
-                    continue;
-                }
 
                 var fromNetworkClosestToReferenceTime = new List<TurnTakingMessage>();
                 //todo: this does not take into account that a client might be once supper loud and then stops transmission
@@ -88,14 +83,21 @@ namespace Happimeter.Services
                     var clientsClosest =
                         _fromNetwork[clientsMessages].Select(x => new {timeDiff = referenceTime - x.AudioTimeStamp, model = x})
                             .OrderBy(x => x.timeDiff).FirstOrDefault();
+                    if (clientsClosest == null)
+                    {
+                        continue;
+                    }
                     fromNetworkClosestToReferenceTime.Add(clientsClosest.model);
                 }
 
-                fromNetworkClosestToReferenceTime.Add(mineClosest.model);
-
                 var loudest = fromNetworkClosestToReferenceTime.OrderByDescending(x => x.Volumne).FirstOrDefault();
 
-                OnTurnTakingUpdate?.Invoke(loudest,loudest.IpAdress == _currentIpAddress);
+                if (loudest == null)
+                {
+                    continue;
+                }
+
+                OnTurnTakingUpdate?.Invoke(loudest,loudest.UserId == _currentIpAddress);
 
                 Thread.Sleep(10);
             }
@@ -104,7 +106,7 @@ namespace Happimeter.Services
 
         public event Action<TurnTakingMessage, bool> OnTurnTakingUpdate;
 
-        public void Start()
+        public void Start(string groupName = null)
         {
             if (!AudioAnalyzer.IsRunning())
             {
@@ -113,7 +115,7 @@ namespace Happimeter.Services
 
             if (!NetworkService.IsRunning())
             {
-                NetworkService.Start();
+                NetworkService.Start(groupName);
             }
 
             Task.Factory.StartNew(CalculateLoudest);

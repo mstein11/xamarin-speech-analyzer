@@ -10,6 +10,13 @@ namespace Happimeter.ViewModels
 	{ 
         private ITurnTakingService TurnTakingService { get; set; }
 
+	    private string _groupName = "";
+
+        public string GroupName {
+            get { return _groupName; }
+            set { SetProperty(ref _groupName, value); }
+        }
+
         /// <summary>
         /// Private backing field to hold the title
         /// </summary>
@@ -62,7 +69,7 @@ namespace Happimeter.ViewModels
 	        if (!TurnTakingService.IsRunning())
 	        {
 	            ButtonText = "Stop Turntaking";
-                TurnTakingService.Start();
+                TurnTakingService.Start(_groupName);
 	        }
 	        else
 	        {
@@ -76,7 +83,7 @@ namespace Happimeter.ViewModels
 	        var upscaledVolumen = (model.Volumne * 1000);
             SpeachEnergy = upscaledVolumen.ToString("N4");
 
-	        Origin = isMe ? "me" : model.IpAdress;
+	        Origin = isMe ? "me" : model.UserId;
 	    }
 	}
 }

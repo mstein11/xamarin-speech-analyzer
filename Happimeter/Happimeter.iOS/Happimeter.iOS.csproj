@@ -37,6 +37,7 @@
     <MtouchEnableBitcode>False</MtouchEnableBitcode>
     <OptimizePNGs>True</OptimizePNGs>
     <MtouchFloat32>False</MtouchFloat32>
+    <CodesignProvision>207014d8-59f9-47ba-b0d4-6acf4314904a</CodesignProvision>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>pdbonly</DebugType>
@@ -110,6 +111,9 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Web.Http">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.Forms.Core, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">

@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Happimeter.Android", "Happi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Happimeter.iOS", "Happimeter\Happimeter.iOS\Happimeter.iOS.csproj", "{07437CEF-2432-44C6-93CF-2015701C8E52}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Happimeter.Server", "Happimeter.Server\Happimeter.Server.csproj", "{351023CC-62D5-4A16-A187-C3E3EFF76CAC}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Happimeter\Happimeter\Happimeter.projitems*{07437cef-2432-44c6-93cf-2015701c8e52}*SharedItemsImports = 4
@@ -52,6 +54,18 @@ Global
 		{07437CEF-2432-44C6-93CF-2015701C8E52}.Release|iPhone.Build.0 = Release|iPhone
 		{07437CEF-2432-44C6-93CF-2015701C8E52}.Release|iPhoneSimulator.ActiveCfg = Release|iPhoneSimulator
 		{07437CEF-2432-44C6-93CF-2015701C8E52}.Release|iPhoneSimulator.Build.0 = Release|iPhoneSimulator
+		{351023CC-62D5-4A16-A187-C3E3EFF76CAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{351023CC-62D5-4A16-A187-C3E3EFF76CAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{351023CC-62D5-4A16-A187-C3E3EFF76CAC}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{351023CC-62D5-4A16-A187-C3E3EFF76CAC}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{351023CC-62D5-4A16-A187-C3E3EFF76CAC}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{351023CC-62D5-4A16-A187-C3E3EFF76CAC}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{351023CC-62D5-4A16-A187-C3E3EFF76CAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{351023CC-62D5-4A16-A187-C3E3EFF76CAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{351023CC-62D5-4A16-A187-C3E3EFF76CAC}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{351023CC-62D5-4A16-A187-C3E3EFF76CAC}.Release|iPhone.Build.0 = Release|Any CPU
+		{351023CC-62D5-4A16-A187-C3E3EFF76CAC}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{351023CC-62D5-4A16-A187-C3E3EFF76CAC}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

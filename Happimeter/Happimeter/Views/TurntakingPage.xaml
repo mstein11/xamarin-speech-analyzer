@@ -36,35 +36,12 @@
             </FormattedString>
           </Label.FormattedText>
         </Label>
-        <Label>
-          <Label.FormattedText>
-            <FormattedString>
-              <FormattedString.Spans>
-                <Span Text="This App analyzes your Speech. After clicking the" />
-                <Span Text=" "/>
-                                <Span Text="Record Button" FontAttributes="Bold" />
-                <Span Text=" " />
-                <Span Text="two values will appear." />
-              </FormattedString.Spans>
-            </FormattedString>
-          </Label.FormattedText>
-        </Label>
-        <Label>
-          <Label.FormattedText>
-            <FormattedString>
-              <FormattedString.Spans>
-                <Span Text="The first value indicates the" />
-                <Span Text=" "/>
-                <Span Text="current speech energy" FontAttributes="Bold" />
-                <Span Text=" "/>
-                <Span Text="and the second value indicates the" />
-                <Span Text=" "/>
-                <Span Text="average speech energy" FontAttributes="Bold" />
-                <Span Text="."/>
-            </FormattedString.Spans>
-            </FormattedString>
-          </Label.FormattedText>
-        </Label>
+                <Label Text="Group Name: "></Label>
+        <Entry Text="{Binding GroupName}">
+        </Entry>
+          <Label Text="WARNING:" FontAttributes="Bold"></Label>
+          <Label Text="As long as not terminated, the app continues to run in the backgroud making http requests approx. every second. Please terminate the app after using it to save your mobil data volume."></Label>
+
                 <Button Margin="0,10,0,0"
                 Text="{Binding ButtonText}" 
                 Command="{Binding TurnTakingButtonCommand}"
