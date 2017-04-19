@@ -36,7 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DataStructures\SlidingBuffer.cs" />
-    <Compile Include="Measurement.cs" />
+    <Compile Include="MeasurementMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

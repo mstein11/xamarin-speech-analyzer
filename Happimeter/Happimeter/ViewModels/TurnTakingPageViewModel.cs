@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using Happimeter.Models;
 using Happimeter.Services;
+using Happimeter.Shared;
 using Xamarin.Forms;
 
 namespace Happimeter.ViewModels
@@ -78,12 +79,12 @@ namespace Happimeter.ViewModels
 	        }
 	    }
 
-	    private void UpdateTurnTakingResult(TurnTakingMessage model, bool isMe)
+	    private void UpdateTurnTakingResult(MeasurementMessage model, bool isMe)
 	    {            
-	        var upscaledVolumen = (model.Volumne * 1000);
+	        var upscaledVolumen = (model.ReportedSpeechEnergy * 1000);
             SpeachEnergy = upscaledVolumen.ToString("N4");
 
-	        Origin = isMe ? "me" : model.UserId;
+	        Origin = isMe ? "me" : model.CustomIdentifier;
 	    }
 	}
 }

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Happimeter.Models;
+using Happimeter.Shared;
 using Newtonsoft.Json;
 using Xamarin.Forms;
 
@@ -20,8 +21,8 @@ namespace Happimeter.Services
 
         private string GroupName { get; set; }
         
-        private readonly ConcurrentQueue<TurnTakingMessage> _sendMessageQueue = new ConcurrentQueue<TurnTakingMessage>();
-        private readonly ConcurrentQueue<TurnTakingMessage> _receiveMessageQueue = new ConcurrentQueue<TurnTakingMessage>();
+        private readonly ConcurrentQueue<MeasurementMessage> _sendMessageQueue = new ConcurrentQueue<MeasurementMessage>();
+        private readonly ConcurrentQueue<MeasurementMessage> _receiveMessageQueue = new ConcurrentQueue<MeasurementMessage>();
         private bool _isRunning;
         private CancellationTokenSource CancelationTokenSource {get; set; }
 
@@ -45,11 +46,11 @@ namespace Happimeter.Services
             while (true)
             {
                 Thread.Sleep(100);
-                var messagesToSent = new List<TurnTakingMessage>();
-                TurnTakingMessage messageToSent;
+                var messagesToSent = new List<MeasurementMessage>();
+                MeasurementMessage messageToSent;
                 while (_sendMessageQueue.TryDequeue(out messageToSent))
                 {
-                    messageToSent.GroupName = GroupName;
+                    messageToSent.TurnTakingGroupName = GroupName;
                     messagesToSent.Add(messageToSent);
                 }
 
@@ -65,7 +66,7 @@ namespace Happimeter.Services
                 {
                     var result =
                         HttpClient.PostAsync(
-                                "http://happimeter-server.azurewebsites.net/api/turntaking/RefreshDataWithServer", content, token)
+                                "http://happimeter-server.azurewebsites.net/api/measurement/ReportAndGetForGroup", content, token)
                             .Result;
                     TryParseNetworkTraffic(result);
                 }
@@ -150,7 +151,7 @@ namespace Happimeter.Services
             {
                 var resultString = result.Content.ReadAsStringAsync().Result;
                 Debug.WriteLine(resultString);
-                var retrievedData = JsonConvert.DeserializeObject<List<TurnTakingMessage>>(resultString);
+                var retrievedData = JsonConvert.DeserializeObject<List<MeasurementMessage>>(resultString);
                 foreach (var turnTakingMessage in retrievedData)
                 {
                     _receiveMessageQueue.Enqueue(turnTakingMessage);
@@ -163,12 +164,12 @@ namespace Happimeter.Services
             }
         }
 
-        public IList<TurnTakingMessage> GetMessages()
+        public IList<MeasurementMessage> GetMessages()
         {
-            var toReturnList = new List<TurnTakingMessage>();
+            var toReturnList = new List<MeasurementMessage>();
             lock (_receiveMessageQueue)
             {
-                TurnTakingMessage message;
+                MeasurementMessage message;
                 while (_receiveMessageQueue.TryDequeue(out message))
                 {
                     toReturnList.Add(message);
@@ -177,7 +178,7 @@ namespace Happimeter.Services
             return toReturnList;
         }
 
-        public void SendMessages(TurnTakingMessage message)
+        public void SendMessages(MeasurementMessage message)
         {
             _sendMessageQueue.Enqueue(message);
         }

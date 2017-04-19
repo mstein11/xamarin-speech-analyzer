@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6245" systemVersion="13F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="X5k-f2-b5h">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6238"/>
@@ -34,9 +34,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="profile_generic.png" width="95" height="95"/>
-        <image name="slideout.png" width="14" height="15"/>
-        <image name="tab_about.png" width="32" height="30"/>
-        <image name="tab_feed.png" width="32" height="30"/>
+        <image name="Icon-60.png" width="180" height="180"/>
     </resources>
 </document>

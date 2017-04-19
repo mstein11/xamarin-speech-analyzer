@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Happimeter.Models;
+using Happimeter.Shared;
 using Happimeter.Shared.DataStructures;
 using Xamarin.Forms;
 
@@ -16,10 +17,10 @@ namespace Happimeter.Services
         private IAudioAnalyzerService AudioAnalyzer { get; set; }
         private INetworkService NetworkService { get; set; }
 
-        private IDictionary<string, SlidingBuffer<TurnTakingMessage>> _fromNetwork =
-            new Dictionary<string, SlidingBuffer<TurnTakingMessage>>();
+        private IDictionary<string, SlidingBuffer<MeasurementMessage>> _fromNetwork =
+            new Dictionary<string, SlidingBuffer<MeasurementMessage>>();
 
-        private SlidingBuffer<TurnTakingMessage> _mine = new SlidingBuffer<TurnTakingMessage>(60);
+        private SlidingBuffer<MeasurementMessage> _mine = new SlidingBuffer<MeasurementMessage>(60);
         private bool _isRunning = false;
 
         private string _currentIpAddress = Guid.NewGuid().ToString();
@@ -35,12 +36,12 @@ namespace Happimeter.Services
 
         private void ReceiveFromAnalyzer(AnalyzedAudioModel model)
         {
-            var turnTakingModel = new TurnTakingMessage
+            var turnTakingModel = new MeasurementMessage
             {
-                AudioTimeStamp = model.TimeStamp,
+                MeasurementTakenAtUtc = model.TimeStamp,
                 Id = Guid.NewGuid(),
-                Volumne = model.SpeechEnergyLastSample,
-                UserId = _currentIpAddress
+                ReportedSpeechEnergy = model.SpeechEnergyLastSample,
+                CustomIdentifier = _currentIpAddress
             };
             NetworkService.SendMessages(turnTakingModel);
             _mine.Add(turnTakingModel);
@@ -48,14 +49,14 @@ namespace Happimeter.Services
 
         private void GetFromNetwork()
         {
-            _fromNetwork = new ConcurrentDictionary<string, SlidingBuffer<TurnTakingMessage>>();
-            var messagesGrouped = NetworkService.GetMessages().GroupBy(x => x.UserId);
+            _fromNetwork = new ConcurrentDictionary<string, SlidingBuffer<MeasurementMessage>>();
+            var messagesGrouped = NetworkService.GetMessages().GroupBy(x => x.CustomIdentifier);
 
             foreach (var messageGroup in messagesGrouped.ToList())
             {
                 if (!_fromNetwork.ContainsKey(messageGroup.Key))
                 {
-                    _fromNetwork.Add(messageGroup.Key,new SlidingBuffer<TurnTakingMessage>(60));
+                    _fromNetwork.Add(messageGroup.Key,new SlidingBuffer<MeasurementMessage>(60));
                 }
 
                 foreach (var turnTakingMessage in messageGroup)
@@ -76,12 +77,12 @@ namespace Happimeter.Services
 
 
 
-                var fromNetworkClosestToReferenceTime = new List<TurnTakingMessage>();
+                var fromNetworkClosestToReferenceTime = new List<MeasurementMessage>();
                 //todo: this does not take into account that a client might be once supper loud and then stops transmission
                 foreach (var clientsMessages in _fromNetwork.Keys)
                 {
                     var clientsClosest =
-                        _fromNetwork[clientsMessages].Select(x => new {timeDiff = referenceTime - x.AudioTimeStamp, model = x})
+                        _fromNetwork[clientsMessages].Select(x => new {timeDiff = referenceTime - x.MeasurementTakenAtUtc, model = x})
                             .OrderBy(x => x.timeDiff).FirstOrDefault();
                     if (clientsClosest == null)
                     {
@@ -90,21 +91,21 @@ namespace Happimeter.Services
                     fromNetworkClosestToReferenceTime.Add(clientsClosest.model);
                 }
 
-                var loudest = fromNetworkClosestToReferenceTime.OrderByDescending(x => x.Volumne).FirstOrDefault();
+                var loudest = fromNetworkClosestToReferenceTime.OrderByDescending(x => x.ReportedSpeechEnergy).FirstOrDefault();
 
                 if (loudest == null)
                 {
                     continue;
                 }
 
-                OnTurnTakingUpdate?.Invoke(loudest,loudest.UserId == _currentIpAddress);
+                OnTurnTakingUpdate?.Invoke(loudest,loudest.CustomIdentifier == _currentIpAddress);
 
                 Thread.Sleep(10);
             }
         }
 
 
-        public event Action<TurnTakingMessage, bool> OnTurnTakingUpdate;
+        public event Action<MeasurementMessage, bool> OnTurnTakingUpdate;
 
         public void Start(string groupName = null)
         {

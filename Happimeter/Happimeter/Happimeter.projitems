@@ -34,7 +34,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\AnalyzedAudioModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\BaseDataObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\RecordingSampleModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Models\TurnTakingMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\AudioAnalyzerService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\IAudioAnalyzerService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\INetworkService.cs" />
