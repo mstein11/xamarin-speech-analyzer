@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using Happimeter.DataStructures;
 using Happimeter.Models;
+using Happimeter.Shared.DataStructures;
 using Xamarin.Forms;
 
 [assembly: Dependency(typeof(Happimeter.Services.AudioAnalyzerService))]

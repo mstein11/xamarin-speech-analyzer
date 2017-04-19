@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Http;
-using Happimeter.Server.DataStructures;
 using Happimeter.Server.Models;
+using Happimeter.Server.Services;
+using Happimeter.Shared.DataStructures;
 
 namespace Happimeter.Server.Controllers
 {
@@ -14,8 +16,11 @@ namespace Happimeter.Server.Controllers
         /// </summary>
         private static Dictionary<string, Dictionary<string,SlidingBuffer<TurnTakingMessage>>> Groups { get; set; }
 
+        private MeasurementService _measurementService;
+
         public TurnTakingController()
         {
+            _measurementService = new MeasurementService();
             if (Groups == null)
             {
                 Groups = new Dictionary<string, Dictionary<string, SlidingBuffer<TurnTakingMessage>>>();
@@ -23,8 +28,10 @@ namespace Happimeter.Server.Controllers
             
         }
 
-        public object ReportAndGetForGroup(List<TurnTakingMessage> message)
+        public async Task<object> ReportAndGetForGroup(List<TurnTakingMessage> message)
         {
+            await _measurementService.SaveMeasurementPoints(message);
+
 
             var groupName = message.FirstOrDefault()?.GroupName;
             var userName = message.FirstOrDefault()?.UserId;

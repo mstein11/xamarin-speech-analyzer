@@ -30,7 +30,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)DataStructures\SlidingBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\AsyncExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\AnalyzedAudioModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\BaseDataObject.cs" />

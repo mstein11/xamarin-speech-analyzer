@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Happimeter.DataStructures;
 using Happimeter.Models;
+using Happimeter.Shared.DataStructures;
 using Xamarin.Forms;
 
 [assembly: Dependency(typeof(Happimeter.Services.TurnTakingService))]

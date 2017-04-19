@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace Happimeter.DataStructures
+namespace Happimeter.Shared.DataStructures
 {
     public class SlidingBuffer<T> : IEnumerable<T>
     {
