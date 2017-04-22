@@ -7,7 +7,7 @@ using Happimeter.Server.Services;
 using Happimeter.Shared;
 using Happimeter.Shared.DataStructures;
 
-namespace Happimeter.Server.Controllers
+namespace Happimeter.Server.Controllers.Api
 {
     public class MeasurementController : ApiController
     {
@@ -15,6 +15,8 @@ namespace Happimeter.Server.Controllers
         ///     GroupNames => Users => Data
         /// </summary>
         private static Dictionary<string, Dictionary<string,SlidingBuffer<MeasurementMessage>>> Groups { get; set; }
+
+        private static Dictionary<string, string> GroupNameToGroupNameWithDate { get; set; }
 
         private MeasurementService _measurementService;
 
@@ -25,12 +27,17 @@ namespace Happimeter.Server.Controllers
             {
                 Groups = new Dictionary<string, Dictionary<string, SlidingBuffer<MeasurementMessage>>>();
             }
+
+            if (GroupNameToGroupNameWithDate == null)
+            {
+                GroupNameToGroupNameWithDate = new Dictionary<string, string>();
+            }
             
         }
 
         public async Task<object> ReportAndGetForGroup(List<MeasurementMessage> message)
         {
-            await _measurementService.SaveMeasurementPoints(message);
+
 
 
             var groupName = message.FirstOrDefault()?.TurnTakingGroupName;
@@ -45,12 +52,23 @@ namespace Happimeter.Server.Controllers
             {
                 userName = "-";
             }
+            var newGroupName = groupName;
 
             foreach (var turnTakingMessage in message)
             {
-                if (!Groups.ContainsKey(groupName))
+                if (!Groups.ContainsKey(groupName) ||
+                    Groups[groupName].SelectMany(x => x.Value)
+                        .OrderByDescending(x => x.ReportedSpeechEnergy)
+                        .FirstOrDefault()?.MeasurementTakenAtUtc < DateTime.UtcNow - TimeSpan.FromMinutes(5))
                 {
                     Groups.Add(groupName, new Dictionary<string, SlidingBuffer<MeasurementMessage>>());
+                    newGroupName = groupName + DateTime.UtcNow.ToString();
+                    GroupNameToGroupNameWithDate.Remove(groupName);
+                    GroupNameToGroupNameWithDate.Add(groupName, newGroupName);
+                }
+                else
+                {
+                    newGroupName = GroupNameToGroupNameWithDate[groupName];
                 }
 
                 if (!Groups[groupName].ContainsKey(userName))
@@ -69,6 +87,8 @@ namespace Happimeter.Server.Controllers
                         .OrderByDescending(y => y.MeasurementTakenAtUtc)
                         .FirstOrDefault()
             ).Where(x => x != null);
+            message.ForEach(x => x.TurnTakingGroupName = GroupNameToGroupNameWithDate[groupName]);
+            await _measurementService.SaveMeasurementPoints(message);
 
             return allLatestMessages;
         }

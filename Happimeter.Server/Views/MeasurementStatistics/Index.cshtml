@@ -1,0 +1,84 @@
+﻿@model Happimeter.Server.Services.MeasurementStatisticsModel
+
+@foreach (var keyValue in Model.LoudestShare)
+{
+    <p>
+        <b>@keyValue.Key:</b> 
+        @foreach (var loudestShare in keyValue.Value)
+        {
+            <b>@loudestShare.Key:</b>
+            <span>@loudestShare.Value</span>
+        }
+    </p>
+}
+
+
+
+
+
+
+<div class="jumbotron">
+    <h1>Turntaking Overview</h1>
+    <p class="lead">Here you will find an overview concerning all Turn Taking sessions.</p>
+</div>
+<div class="row">
+    
+    @foreach (var keyValue in Model.LoudestShare)
+    {
+        <div class="col-md-4">
+            <h2>@keyValue.Key</h2>
+            <canvas id="myChart-@keyValue" width="400" height="400"> </canvas>
+            <script type="text/javascript">
+
+                var ctx = document.getElementById("myChart-@keyValue");
+                var numOfPersons = @Html.Raw(Json.Encode(keyValue.Value.Keys.Count));
+                var colors = [];
+                for (i = 0; i < numOfPersons; i++) {
+                    colors.push(getRandomColor());
+                }
+                var myChart = new Chart(ctx,
+                {
+                    type: 'pie',
+                    data: {
+                        labels: @Html.Raw(Json.Encode(keyValue.Value.Keys.ToList())),
+                        datasets: [
+                            {
+                                label: '# of Votes',
+                                data: @Html.Raw(Json.Encode(keyValue.Value.Values)),
+                                backgroundColor: colors
+                            }
+                        ]
+                    }
+                });
+
+                function getRandomColor() {
+                    var letters = '0123456789ABCDEF'.split('');
+                    var color = '#';
+                    for (var i = 0; i < 6; i++) {
+                        color += letters[Math.floor(Math.random() * 16)];
+                    }
+                    return color;
+                }
+            </script>
+        </div>
+    }
+
+
+            
+
+
+            <div class="col-md-4">
+                <h2>Getting started</h2>
+                <p>
+                    ASP.NET Web API is a framework that makes it easy to build HTTP services that reach
+                    a broad range of clients, including browsers and mobile devices. ASP.NET Web API
+                    is an ideal platform for building RESTful applications on the .NET Framework.
+                </p>
+                <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301870">Learn more &raquo;</a></p>
+            </div>
+            <div class="col-md-4">
+                <h2>Get more libraries</h2>
+                <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
+                <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301871">Learn more &raquo;</a></p>
+            </div>
+        </div>

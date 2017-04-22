@@ -1,9 +1,11 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Happimeter.Server.Data
 {
     public class MeasurementPoint
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
         public double ReportedSpeechEnergy { get; set; }
         public bool IsSpeech { get; set; }

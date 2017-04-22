@@ -23,6 +23,7 @@ namespace Happimeter.Server.Data
         public ApplicationDbContext()
             : base("DefaultConnection", throwIfV1Schema: false)
         {
+            Database.SetInitializer(new Initializer());
         }
         
         public static ApplicationDbContext Create()
