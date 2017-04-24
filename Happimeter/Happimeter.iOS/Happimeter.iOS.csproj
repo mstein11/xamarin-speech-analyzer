@@ -134,6 +134,14 @@
     </Reference>
     <Reference Include="Xamarin.iOS" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="XFGloss, Version=1.0.6.59, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Ansuria.XFGloss.1.0.6.59\lib\Xamarin.iOS10\XFGloss.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="XFGloss.iOS, Version=1.0.6.59, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Ansuria.XFGloss.1.0.6.59\lib\Xamarin.iOS10\XFGloss.iOS.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json">
@@ -178,6 +186,7 @@
     <InterfaceDefinition Include="Resources\_LaunchScreen.storyboard" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Info.plist">
       <SubType>Designer</SubType>
     </None>
