@@ -1,4 +1,8 @@
-﻿using Happimeter.Views;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Happimeter.Data;
+using Happimeter.Services;
+using Happimeter.Views;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -8,6 +12,11 @@ namespace Happimeter
 {
 	public partial class App : Application
 	{
+
+        private static Database _database;
+
+	    private static bool _isRegisteredOnUpdateEvent = false;
+
         public App()
 		{
 			InitializeComponent();
@@ -15,24 +24,20 @@ namespace Happimeter
 			SetMainPage();
 		}
 
-		public static void SetMainPage()
-		{
-            Current.MainPage = new TabbedPage
+	    
+
+        public static Database Database
+        {
+            get
             {
-                Children =
+                if (_database == null)
                 {
-                    new NavigationPage(new RecordingPage())
-                    {
-                        Title = "Speech Analyzer",
-                        Icon = Device.OnPlatform<string>("tab_about.png",null,null)
-                    },
-                    new NavigationPage(new TurnTakingPage())
-                    {
-                        Title = "Turn Taking",
-                        Icon = Device.OnPlatform<string>("tab_about.png",null,null)
-                    },
+                    _database = new Database(DependencyService.Get<IFileHelper>().GetLocalFilePath("Happimeter.db3"));
                 }
-            };
+                return _database;
+            }
         }
-	}
+
+        public static void SetMainPage() => DependencyService.Get<IRoutingService>().HandleAppStart();
+    }
 }

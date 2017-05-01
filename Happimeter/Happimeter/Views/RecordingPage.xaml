@@ -44,32 +44,17 @@
                 <Span Text=" "/>
                                 <Span Text="Record Button" FontAttributes="Bold" />
                 <Span Text=" " />
-                <Span Text="two values will appear." />
+                <Span Text="two values will appear. Additionally this app will report the recorded speech energy to a server for further analysis. Please provide an identifier below that indicates what you are recording." />
               </FormattedString.Spans>
             </FormattedString>
           </Label.FormattedText>
         </Label>
-        <Label>
-          <Label.FormattedText>
-            <FormattedString>
-              <FormattedString.Spans>
-                <Span Text="The first value indicates the" />
-                <Span Text=" "/>
-                <Span Text="current speech energy" FontAttributes="Bold" />
-                <Span Text=" "/>
-                <Span Text="and the second value indicates the" />
-                <Span Text=" "/>
-                <Span Text="average speech energy" FontAttributes="Bold" />
-                <Span Text="."/>
-            </FormattedString.Spans>
-            </FormattedString>
-          </Label.FormattedText>
-        </Label>
-                <Button Margin="0,10,0,0"
-                Text="{Binding ButtonText}" 
-                Command="{Binding OpenWebCommand}"
-                BackgroundColor="{StaticResource Primary}"
-                TextColor="White"/>
+        <Entry Text="{Binding CustomIdentifier}" Placeholder="Please enter Identifier" />
+        <Button Margin="0,10,0,0"
+        Text="{Binding ButtonText}" 
+        Command="{Binding OpenWebCommand}"
+        BackgroundColor="{StaticResource Primary}"
+        TextColor="White"/>
 
             </StackLayout>
     </ScrollView>

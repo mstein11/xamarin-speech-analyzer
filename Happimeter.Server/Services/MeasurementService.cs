@@ -38,15 +38,16 @@ namespace Happimeter.Server.Services
             var listToSave = models.Select(x => new MeasurementPoint
             {
                 IsSpeech = true,
-                IsTurnTaking = x.TurnTakingGroupName != null,
+                IsTurnTaking = x.IsTurnTaking,
                 TurnTakingGroupName = x.TurnTakingGroupName,
                 MeasurementTakenAtUtc = x.MeasurementTakenAtUtc,
                 ReportedSpeechEnergy = x.ReportedSpeechEnergy,
-                CustomIdentifier = "",
+                CustomIdentifier = x.CustomIdentifier,
             });
             try
             {
-
+                DbContext.Configuration.AutoDetectChangesEnabled = false;
+                DbContext.Configuration.ValidateOnSaveEnabled = false;
                 DbContext.MeasurementPoints.AddRange(listToSave);
                 await DbContext.SaveChangesAsync();
             }

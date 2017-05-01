@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Net;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Happimeter.Models;
+using Happimeter.Data;
 using Happimeter.Shared;
 using Newtonsoft.Json;
 using Xamarin.Forms;
@@ -29,15 +28,11 @@ namespace Happimeter.Services
 
         public NetworkService()
         {
-            //UdpClient = new UdpClient(15000) {EnableBroadcast = true};
-            //_ipEndPoints.Add(new IPEndPoint(IPAddress.Broadcast, 15000));
             HttpClient = new HttpClient();
         }
 
         private void Initialize(CancellationToken token)
         {
-            //Task.Factory.StartNew(async () => { await ListenOnNetwork(token); }, token);
-            //Task.Factory.StartNew(async () => { await BroadcastToNetwork(token); }, token);
             Task.Factory.StartNew(() => { RefreshDataWithServer(token); }, token);
         }
 
@@ -45,7 +40,7 @@ namespace Happimeter.Services
         {
             while (true)
             {
-                Thread.Sleep(100);
+                Thread.Sleep(10000);
                 var messagesToSent = new List<MeasurementMessage>();
                 MeasurementMessage messageToSent;
                 while (_sendMessageQueue.TryDequeue(out messageToSent))
@@ -53,6 +48,9 @@ namespace Happimeter.Services
                     messageToSent.TurnTakingGroupName = GroupName;
                     messagesToSent.Add(messageToSent);
                 }
+                
+                var fromDatabaseToSend = GetFromDatabase();
+                messagesToSent.AddRange(fromDatabaseToSend);
 
                 if (messagesToSent.Count == 0)
                 {
@@ -72,91 +70,55 @@ namespace Happimeter.Services
                 }
                 catch (Exception e)
                 {
-                    Debug.WriteLine(e.Message);
+                    var measurementPoints = messagesToSent.Select(x => new MeasurementPoint
+                    {
+                        CustomIdentifier = x.CustomIdentifier,
+                        IsTurnTaking = x.IsTurnTaking,
+                        IsSpeech = x.IsSpeech,
+                        MeasurementTakenAtUtc = x.MeasurementTakenAtUtc,
+                        ReportedSpeechEnergy = x.ReportedSpeechEnergy,
+                        TurnTakingGroupName = x.TurnTakingGroupName
+                    });
+                    foreach (var measurementPoint in measurementPoints)
+                    {
+                        var result = App.Database?.SaveItemAsync(measurementPoint).Result;
+                    }
                 }
-                
-                
             }
         }
 
-        //private async Task ListenOnNetwork(CancellationToken token)
-        //{
-        //    while (true)
-        //    {
-        //        try
-        //        {
-        //            var result = await UdpClient.ReceiveAsync().WithCancellation(token);
-        //            TryParseNetworkTraffic(result);
-        //        }
-        //        catch (OperationCanceledException)
-        //        {
-        //            break;
-        //        }
-        //        Thread.Sleep(10);
-        //    }
-        //}
+        private IList<MeasurementMessage> GetFromDatabase()
+        {
+            var fromDatabase =
+                App.Database.GetEntitesAsync<MeasurementPoint>(1000).Result;
 
-        //private async Task BroadcastToNetwork(CancellationToken token)
-        //{
-        //    while (true)
-        //    {
-        //        TurnTakingMessage messageToSend;
-        //        while (_sendMessageQueue.TryDequeue(out messageToSend))
-        //        {
-        //            try
-        //            {
-        //                foreach (var ipEndPoint in _ipEndPoints)
-        //                {
-        //                    var toSendString = JsonConvert.SerializeObject(messageToSend);
-        //                    var toSendByteArr = Encoding.ASCII.GetBytes(toSendString);
-        //                    if (token.IsCancellationRequested)
-        //                    {
-        //                        return;
-        //                    }
-        //                    await UdpClient.SendAsync(toSendByteArr, toSendByteArr.Length, ipEndPoint)
-        //                        .WithCancellation(token);
-        //                }
-        //            }
-        //            catch (TaskCanceledException)
-        //            {
-        //                return;
-        //            }
-        //        }
-        //        Thread.Sleep(10);
-        //    }
-        //}
+            foreach (var measurementPoint in fromDatabase)
+            {
+                var result = App.Database.DeleteItemAsync(measurementPoint).Result;
+            }
 
-        //private void TryParseNetworkTraffic(UdpReceiveResult result)
-        //{
-        //    try
-        //    {
-        //        var resultString = Encoding.ASCII.GetString(result.Buffer).Trim();
-        //        if (!(resultString.StartsWith("{") && resultString.EndsWith("}")) || //For object
-        //            (!resultString.StartsWith("[") && resultString.EndsWith("]"))) //For array
-        //        {
-        //            return;
-        //        }
-        //        var retrievedData = JsonConvert.DeserializeObject<TurnTakingMessage>(resultString);
-        //        _receiveMessageQueue.Enqueue(retrievedData);
-        //    }
-        //    catch (JsonException)
-        //    {
-        //        return;
-        //    }
-        //}
+            return fromDatabase.Select(x => new MeasurementMessage
+            {
+                CustomIdentifier = x.CustomIdentifier,
+                IsTurnTaking = x.IsTurnTaking,
+                IsSpeech = x.IsSpeech,
+                MeasurementTakenAtUtc = x.MeasurementTakenAtUtc,
+                ReportedSpeechEnergy = x.ReportedSpeechEnergy,
+                TurnTakingGroupName = x.TurnTakingGroupName
+            }).ToList();
+        }
 
         private void TryParseNetworkTraffic(HttpResponseMessage result)
         {
             try
             {
                 var resultString = result.Content.ReadAsStringAsync().Result;
-                Debug.WriteLine(resultString);
-                var retrievedData = JsonConvert.DeserializeObject<List<MeasurementMessage>>(resultString);
-                foreach (var turnTakingMessage in retrievedData)
+                var retrievedData = JsonConvert.DeserializeObject<MeasurementResponse>(resultString);
+                if (!retrievedData.HasTurnTaking) return;
+                foreach (var turnTakingMessage in retrievedData.AllLatestMessages)
                 {
                     _receiveMessageQueue.Enqueue(turnTakingMessage);
                 }
-
             }
             catch (JsonException)
             {

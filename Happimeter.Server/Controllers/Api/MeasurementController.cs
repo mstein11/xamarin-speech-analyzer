@@ -37,11 +37,35 @@ namespace Happimeter.Server.Controllers.Api
 
         public async Task<object> ReportAndGetForGroup(List<MeasurementMessage> message)
         {
+            var turnTaking = message.Where(x => x.IsTurnTaking).ToList();
+            var noTurnTaking = message.Where(x => !x.IsTurnTaking).ToList();
 
+            var returnModel = new MeasurementResponse();
+            if (turnTaking.Any())
+            {
+                returnModel.AllLatestMessages = await HandleTurnTaking(turnTaking);
+                returnModel.HasTurnTaking = true;
+            }
 
+            if (noTurnTaking.Any())
+            {
+                await HandleSpeechOnly(noTurnTaking);
+                returnModel.HasSpeechEnergy = true;
+            }
 
-            var groupName = message.FirstOrDefault()?.TurnTakingGroupName;
-            var userName = message.FirstOrDefault()?.CustomIdentifier;
+            return returnModel;
+        }
+
+        private async Task<object> HandleSpeechOnly(List<MeasurementMessage> messages)
+        {
+            await _measurementService.SaveMeasurementPoints(messages);
+            return "success";
+        }
+
+        private async Task<List<MeasurementMessage>> HandleTurnTaking(List<MeasurementMessage> messages)
+        {
+            var groupName = messages.FirstOrDefault()?.TurnTakingGroupName;
+            var userName = messages.FirstOrDefault()?.CustomIdentifier;
 
             if (string.IsNullOrEmpty(groupName))
             {
@@ -54,8 +78,13 @@ namespace Happimeter.Server.Controllers.Api
             }
             var newGroupName = groupName;
 
-            foreach (var turnTakingMessage in message)
+            foreach (var turnTakingMessage in messages)
             {
+                if (!turnTakingMessage.IsTurnTaking)
+                {
+                    continue;
+                }
+
                 if (!Groups.ContainsKey(groupName) ||
                     Groups[groupName].SelectMany(x => x.Value)
                         .OrderByDescending(x => x.ReportedSpeechEnergy)
@@ -80,17 +109,17 @@ namespace Happimeter.Server.Controllers.Api
             }
 
 
-            var referenceTime  = DateTime.UtcNow;
+            var referenceTime = DateTime.UtcNow;
             var allLatestMessages = Groups[groupName].Select(
                 x =>
                     x.Value.Where(turnTakingMessage => turnTakingMessage.MeasurementTakenAtUtc.AddSeconds(3) > referenceTime)
                         .OrderByDescending(y => y.MeasurementTakenAtUtc)
                         .FirstOrDefault()
             ).Where(x => x != null);
-            message.ForEach(x => x.TurnTakingGroupName = GroupNameToGroupNameWithDate[groupName]);
-            await _measurementService.SaveMeasurementPoints(message);
+            messages.ForEach(x => x.TurnTakingGroupName = GroupNameToGroupNameWithDate[groupName]);
+            await _measurementService.SaveMeasurementPoints(messages);
 
-            return allLatestMessages;
+            return allLatestMessages.ToList();
         }
     }
 }

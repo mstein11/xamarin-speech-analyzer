@@ -67,7 +67,6 @@ namespace Happimeter.iOS.Services
                 System.Runtime.InteropServices.Marshal.Copy(buffer.AudioData, send, 0, (int) buffer.AudioDataByteSize);
 
                 var curretnTime = DateTime.UtcNow;
-                Debug.WriteLine(curretnTime - LastDateTime);
                 LastDateTime = curretnTime;
 
                 var model = new RecordingSampleModel
@@ -95,6 +94,7 @@ namespace Happimeter.iOS.Services
                 return false;
             }
 
+            Initialize();
             var status = AudioQueue.Start();
 
             if (status == AudioQueueStatus.Ok)

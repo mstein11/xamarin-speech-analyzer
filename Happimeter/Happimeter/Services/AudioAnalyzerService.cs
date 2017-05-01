@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using Happimeter.Data;
 using Happimeter.Models;
 using Happimeter.Shared.DataStructures;
 using Xamarin.Forms;
@@ -8,8 +9,6 @@ using Xamarin.Forms;
 [assembly: Dependency(typeof(Happimeter.Services.AudioAnalyzerService))]
 namespace Happimeter.Services
 {
-
-
     public class AudioAnalyzerService : IAudioAnalyzerService
     {
         private SlidingBuffer<byte[]> _buffer = new SlidingBuffer<byte[]>(60);
@@ -22,7 +21,7 @@ namespace Happimeter.Services
             RecorderService.OnReceiveSampleEvent += ProcessAudio;
         }
 
-        private void ProcessAudio(RecordingSampleModel inputData)
+        private async void ProcessAudio(RecordingSampleModel inputData)
         {
             var data = inputData.AudioData;
             _buffer.Add(data);
@@ -49,11 +48,7 @@ namespace Happimeter.Services
             double meanSquare = 2 * totalSquare / data.Length;
             var rms = Math.Sqrt(meanSquare);
             var volume = rms / 32768.0;
-            var tmp = volume.ToString("N4");
-            if (tmp == "NaN")
-            {
-                Debug.WriteLine("test");
-            }
+
             return volume;
         }
 

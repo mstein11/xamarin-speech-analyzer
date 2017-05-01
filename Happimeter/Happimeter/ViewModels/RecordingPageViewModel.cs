@@ -8,7 +8,7 @@ namespace Happimeter.ViewModels
 {
 	public class RecordingPageViewModel : BaseViewModel
 	{ 
-        private IAudioAnalyzerService AudioAnalyzerService { get; set; }
+        private ISpeechEnergyService AudioAnalyzerService { get; set; }
 
         /// <summary>
         /// Private backing field to hold the title
@@ -50,11 +50,19 @@ namespace Happimeter.ViewModels
             set { SetProperty(ref _buttonText, value); }
         }
 
+	    string _customIdentifier = "";
+
+	    public string CustomIdentifier
+	    {
+	        get { return _customIdentifier; }
+	        set { SetProperty(ref _customIdentifier, value); }
+	    }
+
         public RecordingPageViewModel()
 		{
 			Title = "Speech Analyzer";
-		    AudioAnalyzerService = DependencyService.Get<IAudioAnalyzerService>();
-		    AudioAnalyzerService.OnProcessAudioUpdate += UpdateSpeechEnergy;
+		    AudioAnalyzerService = DependencyService.Get<ISpeechEnergyService>();
+		    AudioAnalyzerService.AddOnProcessAudioUpdate(UpdateSpeechEnergy);
 			OpenWebCommand = new Command(ToggleRecord);
 		}
 
@@ -63,20 +71,17 @@ namespace Happimeter.ViewModels
 		/// </summary>
 		public ICommand OpenWebCommand { get; }
 
-	    public ICommand ScanNetworkCommand
-	    {
-	        get { return new Command(() =>
-	        {
-
-	        }); }
-	    }
-
 	    private void ToggleRecord()
-	    {
-	        if (!AudioAnalyzerService.IsRunning())
+	    {            
+	        if (!AudioAnalyzerService.IsRunning)
 	        {
-	            ButtonText = "Stop Recording";
-                AudioAnalyzerService.Start();
+                if (string.IsNullOrEmpty(CustomIdentifier))
+                {
+                    Application.Current.MainPage.DisplayAlert("Error", "Please provide an identifier", "Ok");
+                    return;
+                }
+                ButtonText = "Stop Recording";
+                AudioAnalyzerService.Start(CustomIdentifier);
 	        }
 	        else
 	        {

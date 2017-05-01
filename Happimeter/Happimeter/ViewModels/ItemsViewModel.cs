@@ -44,7 +44,7 @@ namespace Happimeter.ViewModels
 			}
 			catch (Exception ex)
 			{
-				Debug.WriteLine(ex);
+
 				MessagingCenter.Send(new MessagingCenterAlert
 				{
 					Title = "Error",

@@ -30,18 +30,24 @@ namespace Happimeter.Services
             AudioAnalyzer = DependencyService.Get<AudioAnalyzerService>();
             NetworkService = DependencyService.Get<INetworkService>();
 
+            //_currentIpAddress = App.GetCurrentUser().Result.Email;
+
             AudioAnalyzer.OnProcessAudioUpdate += ReceiveFromAnalyzer;
             
         }
 
         private void ReceiveFromAnalyzer(AnalyzedAudioModel model)
         {
+            if (!IsRunning())
+            {
+                return;
+            }
             var turnTakingModel = new MeasurementMessage
             {
                 MeasurementTakenAtUtc = model.TimeStamp,
                 Id = Guid.NewGuid(),
                 ReportedSpeechEnergy = model.SpeechEnergyLastSample,
-                CustomIdentifier = _currentIpAddress
+                CustomIdentifier = _currentIpAddress,
             };
             NetworkService.SendMessages(turnTakingModel);
             _mine.Add(turnTakingModel);
