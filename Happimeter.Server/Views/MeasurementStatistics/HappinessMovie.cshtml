@@ -1,0 +1,246 @@
+﻿@using System.Diagnostics
+@using Newtonsoft.Json
+@model List<Happimeter.Server.Services.MovieService.MovieDataPoint>
+@{
+    ViewBag.Title = "HappinessMovie";
+}
+@section AddToHead
+{
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/jquery.slick/1.6.0/slick.css" />
+    <script type="text/javascript" src="//cdn.jsdelivr.net/jquery.slick/1.6.0/slick.min.js"></script>
+}
+<div class="movie-canvas">
+    <script src="http://maps.googleapis.com/maps/api/js?sensor=false&libraries=visualization&key=AIzaSyBdG_9bXDe9gRU2J-0Zu3n6QEyNDnGXtBk"></script>
+    <div class="movie movie-canvas" style="height: 100%;">
+        <div class="movie-slide-container" style="height: 100%; background-color: #A8CD1B">
+            <div class="movie-slide-text">
+                <div class="">
+                    <p>Welcome to your Happiness-Movie</p>
+                    <p>Press the Button below to get started</p>
+                    <button onclick="startMovie()">Start Movie</button>
+                </div>
+            </div>
+        </div>
+        <div class="movie-slide-container" style="height: 100%; background-image: url('/Content/Movie/FirstSlide.jpeg');">
+            <div class="tlt movie-slide-text">
+                <div class="texts">
+                    <div>Hello Pascal.</div>
+                    <div>welcome to your personal HAPPINESS-MOVIE</div>
+                    <div>today you have been HAPPY 90% of your time</div>
+                    <div>We tracked your MOVEMENT too...</div>
+                    <div>and found 54 LOCATIONS you have been to...</div>
+                    <div>Lets take a look!</div>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+        <div id="map-canvas" style="width: 100%;height:100%"></div>
+        <div class="movie-slide-container" style="height: 100%; background-image: url('/Content/Movie/FirstSlide.jpeg');">
+            <div class="tlt-slide3 movie-slide-text">
+                <div class="texts">
+                    <div>We also marked places WHERE you have been happy</div>
+                    <div>This will help you KEEP TRACK of your happiness</div>
+                    <div>RED spots on the map indicate a happy mood...</div>
+                    <div>GREEN spots the oposite.</div>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+        <div id="heatmap-canvas" style="width: 100%;height:100%"></div>
+        <div class="movie-slide-container" style="height: 100%; background-image: url('/Content/Movie/FirstSlide.jpeg');">
+            <div class="tlt-slide5 movie-slide-text">
+                <div class="texts">
+                    <div>Lets get a little bit more into detail...</div>
+                    <div>You have been 10 Percent more Happy...</div>
+                    <div>compared to yesterday.</div>
+                    <div>And 5 Percent less Active.</div>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+        <div class="movie-slide-container" style="height: 100%; background-image: url('/Content/Movie/FirstSlide.jpeg');">
+            <div class="tlt-slide-final movie-slide-text">
+                <div class="texts">
+                    <div>Thank you for watching.</div>
+                    <div>See you tomorrow...</div>
+                    <div>and think positiv.</div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    var audio = new Audio('/Content/Movie/soundtrack.mp3');
+    $(document).ready(function() {
+        
+        
+        $('.movie').slick({
+            dots: false,
+            infinite: true,
+            speed: 300,
+            slidesToShow: 1,
+            adaptiveHeight: false,
+            accessibility: false,
+            arrows: false
+        });
+        
+    });
+
+    var startMovie = function() {
+        audio.play();
+        $('.movie').slick('slickNext');
+        firstSlide();
+    }
+
+
+
+    var firstSlide = function() {
+        $(".tlt").textillate({
+            in: { effect: 'bounceInUp', sync:true },
+            out: { effect: 'bounceOutDown', sync:true }
+        });
+
+        $(".tlt").on("end.tlt",
+            function() {
+                $('.movie').slick('slickNext');
+                secondSlide();
+            });
+    }
+
+    var secondSlide = function() {
+        var myLatLng = new google.maps.LatLng(50, 50),
+            myOptions = {
+                zoom: 15,
+                center: myLatLng,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                draggable: false,
+                mapTypeControl: false,
+                zoomControl: false,
+                scrollwheel: false,
+                streetViewControl: false,
+                disableDoubleClickZoom: true
+            },
+            map = new google.maps.Map(document.getElementById('map-canvas'), myOptions),
+            marker = new google.maps.Marker({ position: myLatLng, map: map });
+        var infowindow = new google.maps.InfoWindow({
+            content: "-"
+        });
+
+        marker.setMap( map );
+        infowindow.open( map, marker);
+        moveMarker( map, marker, infowindow );
+
+        function moveMarker( map, marker, infowindow ) {
+
+            var json = @Html.Raw(JsonConvert.SerializeObject(Model));
+            var counter = 0;
+            var updateFunction = function() {
+                if (counter < json.length) {
+                    var lat = json[counter].SensorData.GeoLat;
+                    var lng = json[counter].SensorData.GeoLng;
+
+                    var time = json[counter].SensorData.Timestamp;
+                    infowindow.setContent(new Date(time).toLocaleTimeString());
+
+                    marker.setPosition(new google.maps.LatLng(lat, lng));
+                    map.panTo(new google.maps.LatLng(lat, lng));
+                    counter++;
+                    setTimeout(updateFunction, 300);
+                } else {
+
+                    thirdSlide();
+                }
+            }
+            //delayed so you can see it move
+            updateFunction();
+        };
+    }
+
+    var thirdSlide = function() {
+        $('.movie').slick('slickNext');
+        $(".tlt-slide3").textillate({
+            in: { effect: 'bounceInRight', sync:true },
+            out: { effect: 'bounceOutLeft', sync:true }
+        });
+        $(".tlt-slide3").on("end.tlt",
+            function() {
+                $('.movie').slick('slickNext');
+                fourthSlide();
+            });
+    }
+
+    var fourthSlide = function() {
+        var heatMapRawData = @Html.Raw(JsonConvert.SerializeObject(Model.Select(x => x.HeatMapData)));
+        var mapBounds = new google.maps.LatLngBounds();
+        var heatMapData = [];
+        for (var i = 0; i < heatMapRawData.length; i++) {
+            var position = new google.maps.LatLng(heatMapRawData[i].GeoLat, heatMapRawData[i].GeoLng);
+            heatMapData.push({
+                location: position,
+                weight: heatMapRawData[i].Weight * 1000
+            });
+
+            mapBounds.extend(position);
+        }
+
+        var myOptions = {
+                zoom: 15,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                draggable: false,
+                mapTypeControl: false,
+                zoomControl: false,
+                scrollwheel: false,
+                streetViewControl: false,
+                disableDoubleClickZoom: true
+            },
+            map = new google.maps.Map(document.getElementById('heatmap-canvas'), myOptions);
+
+        var rate = (noAccidents-MIN_NO_ACC)/(MAX_NO_ACC-MIN_NO_ACC+1);
+        console.log(rate);
+        var gradient = [
+            'rgba('+Math.round(255*rate)+', '+Math.round(255*(1-rate))+', 0, 0)',
+            'rgba('+Math.round(255*rate)+', '+Math.round(255*(1-rate))+', 0, 1)'];
+
+
+        var heatmap = new google.maps.visualization.HeatmapLayer({
+            data: heatMapData,
+            radius: 50
+        });
+        heatmap.setMap(map);
+        map.fitBounds(mapBounds);
+
+        setTimeout(fithSlide,
+            5000);
+    }
+
+    var fithSlide = function() {
+        $('.movie').slick('slickNext');
+        $(".tlt-slide5").textillate({
+            in: { effect: 'bounceInRight', sync:true },
+            out: { effect: 'bounceOutLeft', sync:true }
+        });
+
+        $(".tlt-slide5").on("end.tlt",
+            function() {
+                $('.movie').slick('slickNext');
+                finalSlide();
+            });
+    }
+
+    var finalSlide = function() {
+        $(".tlt-slide-final").textillate({
+            in: { effect: 'bounceInRight', sync:true },
+            out: { effect: 'bounceOutLeft', sync:true }
+        });
+
+        $(".tlt-slide-final").on("end.tlt",
+            function() {
+                audio.pause();
+            });
+    }
+
+</script>

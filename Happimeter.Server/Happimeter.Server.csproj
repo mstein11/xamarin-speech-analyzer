@@ -82,6 +82,10 @@
       <HintPath>..\packages\Mvc.RazorTools.Base.1.0.5\lib\net45\Mvc.RazorTools.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="MySql.Data, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <HintPath>..\packages\MySql.Data.6.9.9\lib\net45\MySql.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -247,6 +251,8 @@
     <Compile Include="Controllers\Api\MeasurementController.cs" />
     <Compile Include="Controllers\MeasurementStatisticsController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
+    <Compile Include="Data\HappimeterDatabase\DatabaseContext.cs" />
+    <Compile Include="Data\HappimeterDatabase\MovieDataPoint.cs" />
     <Compile Include="Data\HappimeterUserAccount.cs" />
     <Compile Include="Data\MeasurementPoint.cs" />
     <Compile Include="Data\Initializer.cs" />
@@ -260,12 +266,15 @@
     <Compile Include="Providers\ApplicationOAuthProvider.cs" />
     <Compile Include="Results\ChallengeResult.cs" />
     <Compile Include="Services\MeasurementService.cs" />
+    <Compile Include="Services\MovieService.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\Movie\FirstSlide.jpeg" />
+    <Content Include="Content\Movie\soundtrack.mp3" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -303,6 +312,8 @@
     <None Include="Scripts\jquery.validate-vsdoc.js" />
     <Content Include="Scripts\jquery.ba-throttle-debounce.js" />
     <Content Include="Scripts\jquery.ba-throttle-debounce.min.js" />
+    <Content Include="Scripts\jquery.lettering-0.6.1.min.js" />
+    <Content Include="Scripts\jquery.textillate.js" />
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
@@ -333,6 +344,7 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Service References\Application Insights\ConnectedService.json" />
     <Content Include="Views\MeasurementStatistics\Index.cshtml" />
+    <Content Include="Views\MeasurementStatistics\HappinessMovie.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
