@@ -24,6 +24,8 @@ namespace Happimeter.Server.Services
                     MaxMood = maxMood,
                     MinMood = minMood,
                     Weight = (relatedMood?.Activation ?? 0) + relatedMood?.Pleasant ?? 0,
+                    Pleasance = (relatedMood?.Pleasant ?? 0),
+                    Activation = relatedMood?.Activation ?? 0,
                     GeoLat = sensorData.GeoLat,
                     GeoLng = sensorData.GeoLng
                 };

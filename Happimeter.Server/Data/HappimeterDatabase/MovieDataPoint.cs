@@ -42,6 +42,10 @@ namespace Happimeter.Server.Data.HappimeterDatabase
         public int MinMood { get; set; }
         public int Weight { get; set; }
 
+        public int Pleasance { get; set; }
+
+        public int Activation { get; set; }
+
         public double GeoLat { get; set; }
 
         public double GeoLng { get; set; }

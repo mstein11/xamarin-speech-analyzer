@@ -176,7 +176,9 @@
     var fourthSlide = function() {
         var heatMapRawData = @Html.Raw(JsonConvert.SerializeObject(Model.Select(x => x.HeatMapData)));
         var mapBounds = new google.maps.LatLngBounds();
-        var heatMapData = [];
+        
+        var happyMapData = [];
+        var sadMapData = [];
 
         
         var myOptions = {
@@ -195,37 +197,43 @@
 
         for (var i = 0; i < heatMapRawData.length; i++) {
             var position = new google.maps.LatLng(heatMapRawData[i].GeoLat, heatMapRawData[i].GeoLng);
-            heatMapData.push({
-                location: position,
-                weight: heatMapRawData[i].Weight * 1000
-            });
+
             mapBounds.extend(position);
-
-            var heatmap = new google.maps.visualization.HeatmapLayer({
-                data: position,
-                radius: 10,
-                dissapating: false
-            });
-
-            var rate = (heatMapRawData[i].Weight - heatMapRawData[i].MinMood) /
-                (heatMapRawData[i].MaxMood - heatMapRawData[i].MinMood + 1);
-
-            console.log(rate);
-            var gradient = [
-                'rgba('+Math.round(255*rate)+', '+Math.round(255*(1-rate))+', 0, 0)',
-                'rgba('+Math.round(255*rate)+', '+Math.round(255*(1-rate))+', 0, 1)'];
-            heatmap.set('gradient', gradient);
-            heatmap.setMap(map);
+            console.log(heatMapRawData[i].Pleasance);
+            if (heatMapRawData[i].Pleasance > 0 && Math.random()) {
+                happyMapData.push({ location: position, weight: 1 + heatMapRawData[i].Activation });//if really happy also Activation is 1
+            } else {
+                sadMapData.push({ location: position, weight: 1 + heatMapRawData[i].Activation });//if sad happy also Activation is 1
+            }
         }
 
 
-        var heatmap = new google.maps.visualization.HeatmapLayer({
-            data: heatMapData,
-            radius: 50
+        var happyGradient = [
+            'rgba(0, 255, 0, 0)',
+            'rgba(0, 255, 0, 0.8)',
+            'rgba(0, 255, 0, 1)'
+        ];
+        var happyHeatmap = new google.maps.visualization.HeatmapLayer({
+            data: happyMapData,
+            radius: 75
         });
-        heatmap.setMap(map);
-        map.fitBounds(mapBounds);
+        happyHeatmap.set('gradient', happyGradient);
+        happyHeatmap.setMap(map);
 
+        var sadGradient = [
+            'rgba( 155,0,0,  0)',
+            'rgba(155,0, 0,  0.4)',
+            'rgba(155,0, 0,  0.6)'
+        ];
+        var sadHeatmap = new google.maps.visualization.HeatmapLayer({
+            data: sadMapData,
+            radius: 75,
+            dissapating: false
+        });
+        sadHeatmap.set('gradient', sadGradient);
+        sadHeatmap.setMap(map);
+
+        map.fitBounds(mapBounds);
         setTimeout(fithSlide,
             5000);
     }
