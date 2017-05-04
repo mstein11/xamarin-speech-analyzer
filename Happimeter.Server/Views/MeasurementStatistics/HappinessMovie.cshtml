@@ -177,33 +177,46 @@
         var heatMapRawData = @Html.Raw(JsonConvert.SerializeObject(Model.Select(x => x.HeatMapData)));
         var mapBounds = new google.maps.LatLngBounds();
         var heatMapData = [];
+
+        
+        var myOptions = {
+            zoom: 15,
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            draggable: false,
+            mapTypeControl: false,
+            zoomControl: false,
+            scrollwheel: false,
+            streetViewControl: false,
+            disableDoubleClickZoom: true
+        },
+            map = new google.maps.Map(document.getElementById('heatmap-canvas'), myOptions);
+
+
+
         for (var i = 0; i < heatMapRawData.length; i++) {
             var position = new google.maps.LatLng(heatMapRawData[i].GeoLat, heatMapRawData[i].GeoLng);
             heatMapData.push({
                 location: position,
                 weight: heatMapRawData[i].Weight * 1000
             });
-
             mapBounds.extend(position);
+
+            var heatmap = new google.maps.visualization.HeatmapLayer({
+                data: position,
+                radius: 10,
+                dissapating: false
+            });
+
+            var rate = (heatMapRawData[i].Weight - heatMapRawData[i].MinMood) /
+                (heatMapRawData[i].MaxMood - heatMapRawData[i].MinMood + 1);
+
+            console.log(rate);
+            var gradient = [
+                'rgba('+Math.round(255*rate)+', '+Math.round(255*(1-rate))+', 0, 0)',
+                'rgba('+Math.round(255*rate)+', '+Math.round(255*(1-rate))+', 0, 1)'];
+            heatmap.set('gradient', gradient);
+            heatmap.setMap(map);
         }
-
-        var myOptions = {
-                zoom: 15,
-                mapTypeId: google.maps.MapTypeId.ROADMAP,
-                draggable: false,
-                mapTypeControl: false,
-                zoomControl: false,
-                scrollwheel: false,
-                streetViewControl: false,
-                disableDoubleClickZoom: true
-            },
-            map = new google.maps.Map(document.getElementById('heatmap-canvas'), myOptions);
-
-        var rate = (noAccidents-MIN_NO_ACC)/(MAX_NO_ACC-MIN_NO_ACC+1);
-        console.log(rate);
-        var gradient = [
-            'rgba('+Math.round(255*rate)+', '+Math.round(255*(1-rate))+', 0, 0)',
-            'rgba('+Math.round(255*rate)+', '+Math.round(255*(1-rate))+', 0, 1)'];
 
 
         var heatmap = new google.maps.visualization.HeatmapLayer({
