@@ -1,0 +1,37 @@
+﻿@using System.Diagnostics
+@using Newtonsoft.Json
+@{
+    ViewBag.Title = "HappinessMovie";
+}
+@section AddToHead
+{
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+}
+<div class="movie-canvas">
+    <div class="movie-slide-container" style="height: 100%; background-color: #A8CD1B">
+        <div class="movie-slide-text">
+            <form action="@Url.Action("HappinessMovie")" method="POST">
+                <div class="validation-summary-errors">
+                    @ViewBag.Error
+                </div>
+                <input id="acutal-date" type="hidden" name="date"/>
+                <p>Happiness Movie Selection</p>
+                <p>E-Mail: <input type="text"name="mail"/>
+                </p>
+                <p>Date: <input id="datepicker" type="text"/>
+                </p>
+                <button onclick="startMovie()">Start Movie</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+  $( function() {
+      $("#datepicker").datepicker({
+          altField: "#acutal-date",
+          altFormat: "yy-mm-dd"
+      });
+  } );
+</script>

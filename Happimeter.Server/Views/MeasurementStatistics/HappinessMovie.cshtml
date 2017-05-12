@@ -1,6 +1,6 @@
 ﻿@using System.Diagnostics
 @using Newtonsoft.Json
-@model List<Happimeter.Server.Services.MovieService.MovieDataPoint>
+@model Happimeter.Server.Services.MovieService.MovieServiceModel
 @{
     ViewBag.Title = "HappinessMovie";
 }
@@ -24,36 +24,49 @@
         <div class="movie-slide-container" style="height: 100%; background-image: url('/Content/Movie/FirstSlide.jpeg');">
             <div class="tlt movie-slide-text">
                 <div class="texts">
-                    <div>Hello Pascal.</div>
-                    <div>welcome to your personal HAPPINESS-MOVIE</div>
-                    <div>today you have been HAPPY 90% of your time</div>
-                    <div>We tracked your MOVEMENT too...</div>
-                    <div>and found 54 LOCATIONS you have been to...</div>
-                    <div>Lets take a look!</div>
-                    <div></div>
+                    <div id="name-text"></div>
+                    <div>Welcome to your personal HAPPINESS-MOVIE</div>
+                    <div id="happiness-percentage-text"></div>
+                    @if (Model.NumberLocations == 0)
+                    {
+                        <div>Unfortunatly u deactivated GPS, so we couldn't track your movement</div>
+                        <div></div>
+                    }
+                    else
+                    {
+                        <div>We tracked your MOVEMENT too...</div>
+                        <div id="number-locations-text"></div>
+                        <div>Lets take a look!</div>
+                        <div></div>
+                    }
                 </div>
             </div>
         </div>
-        <div id="map-canvas" style="width: 100%;height:100%"></div>
-        <div class="movie-slide-container" style="height: 100%; background-image: url('/Content/Movie/FirstSlide.jpeg');">
-            <div class="tlt-slide3 movie-slide-text">
-                <div class="texts">
-                    <div>We also marked places WHERE you have been happy</div>
-                    <div>This will help you KEEP TRACK of your happiness</div>
-                    <div>RED spots on the map indicate a happy mood...</div>
-                    <div>GREEN spots the oposite.</div>
-                    <div></div>
+        @if (Model.NumberLocations != 0)
+        {
+
+
+            <div id="map-canvas" style="width: 100%; height: 100%"></div>
+            <div class="movie-slide-container" style="height: 100%; background-image: url('/Content/Movie/FirstSlide.jpeg');">
+                <div class="tlt-slide3 movie-slide-text">
+                    <div class="texts">
+                        <div>We also marked places WHERE you have been happy</div>
+                        <div>This will help you KEEP TRACK of your happiness</div>
+                        <div>GREEN spots on the map indicate a happy mood...</div>
+                        <div>RED spots the oposite.</div>
+                        <div></div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div id="heatmap-canvas" style="width: 100%;height:100%"></div>
+            <div id="heatmap-canvas" style="width: 100%; height: 100%"></div>
+        }
         <div class="movie-slide-container" style="height: 100%; background-image: url('/Content/Movie/FirstSlide.jpeg');">
             <div class="tlt-slide5 movie-slide-text">
                 <div class="texts">
                     <div>Lets get a little bit more into detail...</div>
-                    <div>You have been 10 Percent more Happy...</div>
+                    <div id="pleasance-to-yesterday-text"></div>
                     <div>compared to yesterday.</div>
-                    <div>And 5 Percent less Active.</div>
+                    <div id="activation-to-yesterday-text"></div>
                     <div></div>
                 </div>
             </div>
@@ -75,9 +88,10 @@
 
 <script type="text/javascript">
     var audio = new Audio('/Content/Movie/soundtrack.mp3');
+    var json = @Html.Raw(JsonConvert.SerializeObject(Model));
     $(document).ready(function() {
-        
-        
+
+        init();
         $('.movie').slick({
             dots: false,
             infinite: true,
@@ -87,8 +101,31 @@
             accessibility: false,
             arrows: false
         });
-        
+
     });
+
+    var init = function() {
+        $('#name-text').html("Hello " + json.Name + ".");
+        $('#happiness-percentage-text').html("today you have been HAPPY " + json.HappinessRatio + "% of your time");
+        @if (Model.NumberLocations != 0)
+        {
+            @Html.Raw("$('#number-locations-text').html('and found ' + json.NumberLocations + ' LOCATIONS you have been to...');");
+        }
+        $();
+        if (json.HappinessToYesterday >= 0) {
+            $('#pleasance-to-yesterday-text').html('You have been ' + json.HappinessToYesterday + '% more Happy...');
+        } else {
+            $('#pleasance-to-yesterday-text').html('You have been ' + json.HappinessToYesterday*-1 + '% less Happy...');
+        }
+        
+        
+        if (json.ActivationToYesterday >= 0) {
+            $('#activation-to-yesterday-text').html("And " + json.ActivationToYesterday + "% more Active.");
+        } else {
+            $('#activation-to-yesterday-text').html("And " + json.ActivationToYesterday*-1 + "% less Active.");
+        }
+        
+    }
 
     var startMovie = function() {
         audio.play();
@@ -106,12 +143,20 @@
 
         $(".tlt").on("end.tlt",
             function() {
-                $('.movie').slick('slickNext');
-                secondSlide();
+
+                @if (Model.NumberLocations == 0)
+                {
+                    @Html.Raw("fithSlide();")
+                }
+                else
+                {
+                    @Html.Raw("secondSlide();")
+                }                
             });
     }
 
     var secondSlide = function() {
+        $('.movie').slick('slickNext');
         var myLatLng = new google.maps.LatLng(50, 50),
             myOptions = {
                 zoom: 15,
@@ -135,23 +180,34 @@
         moveMarker( map, marker, infowindow );
 
         function moveMarker( map, marker, infowindow ) {
-
-            var json = @Html.Raw(JsonConvert.SerializeObject(Model));
+            var jsonList = json.MovieDataPoints;
             var counter = 0;
             var updateFunction = function() {
-                if (counter < json.length) {
-                    var lat = json[counter].SensorData.GeoLat;
-                    var lng = json[counter].SensorData.GeoLng;
+                if (counter < jsonList.length) {
+                    var lat = jsonList[counter].SensorData.GeoLat;
+                    var lng = jsonList[counter].SensorData.GeoLng;
 
-                    var time = json[counter].SensorData.Timestamp;
-                    infowindow.setContent(new Date(time).toLocaleTimeString());
+                    var time = jsonList[counter].SensorData.Timestamp;
+
+                    var contentHtml = "<div class='map-happy-icon-container'>";
+                    if (jsonList[counter].MoodData.Pleasant == 0) {
+                        contentHtml += '<i class="fa fa-frown-o map-happy-icon" aria-hidden="true"></i>';
+                    } else if (jsonList[counter].MoodData.Pleasant == 1) {
+                        contentHtml += '<i class="fa fa-meh-o map-happy-icon" aria-hidden="true"></i>';
+                    } else {
+                        contentHtml += '<i class="fa fa-smile-o map-happy-icon" aria-hidden="true"></i>';
+                    }
+                    contentHtml += '</div>';
+                    contentHtml += jsonList[counter].MoodData.IsCalculated ? 'predicted' : 'provided';
+                    contentHtml += '<br />';
+                    contentHtml += new Date(time).toLocaleTimeString();
+                    infowindow.setContent(contentHtml);
 
                     marker.setPosition(new google.maps.LatLng(lat, lng));
                     map.panTo(new google.maps.LatLng(lat, lng));
                     counter++;
-                    setTimeout(updateFunction, 300);
+                    setTimeout(updateFunction, 500);
                 } else {
-
                     thirdSlide();
                 }
             }
@@ -168,19 +224,20 @@
         });
         $(".tlt-slide3").on("end.tlt",
             function() {
-                $('.movie').slick('slickNext');
+
                 fourthSlide();
             });
     }
 
     var fourthSlide = function() {
-        var heatMapRawData = @Html.Raw(JsonConvert.SerializeObject(Model.Select(x => x.HeatMapData)));
+        $('.movie').slick('slickNext');
+        var heatMapRawData = @Html.Raw(JsonConvert.SerializeObject(Model.MovieDataPoints.Select(x => x.HeatMapData)));
         var mapBounds = new google.maps.LatLngBounds();
-        
+
         var happyMapData = [];
         var sadMapData = [];
 
-        
+
         var myOptions = {
             zoom: 15,
             mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -200,8 +257,8 @@
 
             mapBounds.extend(position);
             console.log(heatMapRawData[i].Pleasance);
-            if (heatMapRawData[i].Pleasance > 0 && Math.random()) {
-                happyMapData.push({ location: position, weight: 1 + heatMapRawData[i].Activation });//if really happy also Activation is 1
+            if (heatMapRawData[i].Pleasance > 1 && Math.random()) {
+                happyMapData.push({ location: position, weight: heatMapRawData[i].Pleasance + heatMapRawData[i].Activation });//if really happy also Activation is 1
             } else {
                 sadMapData.push({ location: position, weight: 1 + heatMapRawData[i].Activation });//if sad happy also Activation is 1
             }

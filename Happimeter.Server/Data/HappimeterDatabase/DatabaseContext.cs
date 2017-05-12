@@ -45,8 +45,11 @@ namespace Happimeter.Server.Data.HappimeterDatabase
         {
             IsConnect();
             var cmd = _connection.CreateCommand();
-            cmd.CommandText = "SELECT u.id,u.mail, md.pleasant, md.activation, md.timestamp FROM mood_data md, user u WHERE u.id = md.user_id AND DATE(md.timestamp) = DATE(@date) AND u.mail = @mail";
-            cmd.Parameters.AddWithValue("mail", "pbudner@mit.edu");
+            cmd.CommandText = @"SELECT u.id,u.mail,u.name,
+                IF(md.api_version = 'v0', TRUNCATE(md.pleasant / 2, 0), md.pleasant) as pleasant,
+                IF(md.api_version = 'v0', TRUNCATE(md.activation / 2, 0), md.activation) as activation,
+	            md.timestamp FROM mood_data md, user u WHERE u.id = md.user_id AND DATE(md.timestamp) = DATE(@date) AND u.mail = @mail";
+            cmd.Parameters.AddWithValue("mail", userMail);
             cmd.Parameters.AddWithValue("date", referenceDate.ToString("yyyy-MM-dd HH:mm:ss"));
 
             var reader = cmd.ExecuteReader();
@@ -55,10 +58,12 @@ namespace Happimeter.Server.Data.HappimeterDatabase
             {
                 var tmp = new MoodData
                 {
+                    Name = reader["name"].ToString(),
                     Email = reader["mail"].ToString(),
                     Activation = int.Parse(reader["activation"].ToString()),
                     Pleasant = int.Parse(reader["pleasant"].ToString()),
-                    Timestamp = DateTime.Parse(reader.GetString("timestamp"))
+                    Timestamp = DateTime.Parse(reader.GetString("timestamp")),
+                    IsCalculated = false
                 };
                 resultList.Add(tmp);
             }
@@ -66,7 +71,7 @@ namespace Happimeter.Server.Data.HappimeterDatabase
             var cmd2 = _connection.CreateCommand();
             cmd2.CommandText =
                 "SELECT u.id,u.mail, cp.pleasance, cp.activation, cp.predicted_at as timestamp FROM classifier_predictions cp, user u WHERE u.id = cp.user_id AND DATE(cp.predicted_at) = DATE(@date) AND u.mail = @mail";
-            cmd2.Parameters.AddWithValue("mail", "pbudner@mit.edu");
+            cmd2.Parameters.AddWithValue("mail", userMail);
             cmd2.Parameters.AddWithValue("date", referenceDate.ToString("yyyy-MM-dd HH:mm:ss"));
             var reader2 = cmd2.ExecuteReader();
             while (reader2.Read())
@@ -76,7 +81,8 @@ namespace Happimeter.Server.Data.HappimeterDatabase
                     Email = reader2["mail"].ToString(),
                     Activation = int.Parse(reader2["activation"].ToString()),
                     Pleasant = int.Parse(reader2["pleasance"].ToString()),
-                    Timestamp = DateTime.Parse(reader2.GetString("timestamp"))
+                    Timestamp = DateTime.Parse(reader2.GetString("timestamp")),
+                    IsCalculated = true
                 };
                 resultList.Add(tmp);
             }
@@ -90,7 +96,7 @@ namespace Happimeter.Server.Data.HappimeterDatabase
             IsConnect();
             var cmd = _connection.CreateCommand();
             cmd.CommandText = "SELECT u.id, u.mail, sd.timestamp, sd.avgbpm, sd.activity, sd.avglightlevel, sd.positionlat, sd.positionlon, sd.vmc FROM sensor_data sd, user u WHERE u.id = sd.user_id AND DATE(sd.timestamp) = DATE(@date) AND u.mail = @mail";
-            cmd.Parameters.AddWithValue("mail", "pbudner@mit.edu");
+            cmd.Parameters.AddWithValue("mail", userMail);
             cmd.Parameters.AddWithValue("date", referenceDate.ToString("yyyy-MM-dd HH:mm:ss"));
 
             var reader = cmd.ExecuteReader();
@@ -103,8 +109,8 @@ namespace Happimeter.Server.Data.HappimeterDatabase
                     LightLevel = int.Parse(reader["avglightlevel"].ToString()),
                     Vmc = long.Parse(reader["vmc"].ToString()),
                     Activity = int.Parse(reader["activity"].ToString()),
-                    GeoLat = double.Parse(reader["positionlat"].ToString()),
-                    GeoLng = double.Parse(reader["positionlon"].ToString()),
+                    GeoLat = !string.IsNullOrEmpty(reader.GetStringSafe("positionlat")) ? (double?)double.Parse(reader.GetString("positionlat")) : null,
+                    GeoLng = !string.IsNullOrEmpty(reader.GetStringSafe("positionlon")) ? (double?)double.Parse(reader.GetString("positionlon")) : null,
                     Timestamp = DateTime.Parse(reader.GetString("timestamp"))
                 };
                 resultList.Add(tmp);
@@ -137,5 +143,6 @@ namespace Happimeter.Server.Data.HappimeterDatabase
             _connection.Close();
             _connection = null;
         }
+
     }
 }

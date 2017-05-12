@@ -16,15 +16,18 @@ namespace Happimeter.Server.Data.HappimeterDatabase
         public int Activation { get; set; }
 
         public DateTime Timestamp { get; set; }
+        public string Name { get; set; }
+
+        public bool IsCalculated { get; set; }
     }
 
     public class SensorData
     {
         public DateTime Timestamp { get; set; }
 
-        public double GeoLat { get; set; }
+        public double? GeoLat { get; set; }
 
-        public double GeoLng { get; set; }
+        public double? GeoLng { get; set; }
 
         public int Activity { get; set; }
 
@@ -49,5 +52,7 @@ namespace Happimeter.Server.Data.HappimeterDatabase
         public double GeoLat { get; set; }
 
         public double GeoLng { get; set; }
+
+        public bool IsCalculated { get; set; }
     }
 }

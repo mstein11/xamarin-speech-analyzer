@@ -26,6 +26,7 @@ textarea {
     margin: 0;
     height: 100%;
     z-index: 2000;
+    background-color: #A8CD1B;
 }
 
 .movie-slide-container {
@@ -62,4 +63,23 @@ textarea {
 .slick-list,
 .slick-track {
     height: 100%;
+}
+
+.map-happy-icon-container {
+    text-align: center;
+}
+
+.gm-style-iw + div {display: none;}
+
+.map-happy-icon {
+    font-size: 26px !important;
+    text-align: center;
+}
+
+.fa-smile-o {
+    color: green;
+}
+
+.fa-frown-o {
+    color: red;           
 }
