@@ -20,6 +20,12 @@ namespace Happimeter.Server.Services
             return DbContext.HappimeterUserAccounts.ToList();
         }
 
+        public void UpdateLastMovieMailSent(HappimeterUserAccount user)
+        {
+            user.LastSendMovie = DateTime.UtcNow;
+            DbContext.SaveChanges();
+        }
+
         public HappimeterUserAccount GetUserByEmail(string email)
         {
             return DbContext.HappimeterUserAccounts.FirstOrDefault(x => x.Email == email);

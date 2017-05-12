@@ -71,6 +71,10 @@ textarea {
 
 .gm-style-iw + div {display: none;}
 
+.map-happy-container {
+    margin-left: 13px;
+}
+
 .map-happy-icon {
     font-size: 26px !important;
     text-align: center;

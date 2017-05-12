@@ -46,7 +46,7 @@
         {
 
 
-            <div id="map-canvas" style="width: 100%; height: 100%"></div>
+            <div id="map-canvas" style="width: 100%; height: 100%;"></div>
             <div class="movie-slide-container" style="height: 100%; background-image: url('/Content/Movie/FirstSlide.jpeg');">
                 <div class="tlt-slide3 movie-slide-text">
                     <div class="texts">
@@ -156,8 +156,9 @@
     }
 
     var secondSlide = function() {
-        $('.movie').slick('slickNext');
-        var myLatLng = new google.maps.LatLng(50, 50),
+        var jsonList = json.MovieDataPoints;
+        
+        var myLatLng = new google.maps.LatLng(jsonList[0].SensorData.GeoLat, jsonList[0].SensorData.GeoLng),
             myOptions = {
                 zoom: 15,
                 center: myLatLng,
@@ -177,10 +178,19 @@
 
         marker.setMap( map );
         infowindow.open( map, marker);
-        moveMarker( map, marker, infowindow );
+
+        google.maps.event.addListenerOnce(map,
+            'idle',
+            function() {
+                $('.movie').slick('slickNext');
+                $('#map-canvas').addClass('animated bounceInDown');
+                moveMarker(map, marker, infowindow);
+            });
+
+        
 
         function moveMarker( map, marker, infowindow ) {
-            var jsonList = json.MovieDataPoints;
+
             var counter = 0;
             var updateFunction = function() {
                 if (counter < jsonList.length) {
@@ -188,8 +198,8 @@
                     var lng = jsonList[counter].SensorData.GeoLng;
 
                     var time = jsonList[counter].SensorData.Timestamp;
-
-                    var contentHtml = "<div class='map-happy-icon-container'>";
+                    var contentHtml = "<div class='map-happy-container'>";
+                    contentHtml += "<div class='map-happy-icon-container'>";
                     if (jsonList[counter].MoodData.Pleasant == 0) {
                         contentHtml += '<i class="fa fa-frown-o map-happy-icon" aria-hidden="true"></i>';
                     } else if (jsonList[counter].MoodData.Pleasant == 1) {
@@ -201,6 +211,7 @@
                     contentHtml += jsonList[counter].MoodData.IsCalculated ? 'predicted' : 'provided';
                     contentHtml += '<br />';
                     contentHtml += new Date(time).toLocaleTimeString();
+                    contentHtml += '</div>';
                     infowindow.setContent(contentHtml);
 
                     marker.setPosition(new google.maps.LatLng(lat, lng));
@@ -208,7 +219,10 @@
                     counter++;
                     setTimeout(updateFunction, 500);
                 } else {
-                    thirdSlide();
+                    setTimeout(function() {
+                        $('#map-canvas').addClass('animated bounceOutUp');
+                        setTimeout(thirdSlide, 1500);
+                    }, 500);
                 }
             }
             //delayed so you can see it move
@@ -230,7 +244,6 @@
     }
 
     var fourthSlide = function() {
-        $('.movie').slick('slickNext');
         var heatMapRawData = @Html.Raw(JsonConvert.SerializeObject(Model.MovieDataPoints.Select(x => x.HeatMapData)));
         var mapBounds = new google.maps.LatLngBounds();
 
@@ -249,8 +262,6 @@
             disableDoubleClickZoom: true
         },
             map = new google.maps.Map(document.getElementById('heatmap-canvas'), myOptions);
-
-
 
         for (var i = 0; i < heatMapRawData.length; i++) {
             var position = new google.maps.LatLng(heatMapRawData[i].GeoLat, heatMapRawData[i].GeoLng);
@@ -291,7 +302,17 @@
         sadHeatmap.setMap(map);
 
         map.fitBounds(mapBounds);
-        setTimeout(fithSlide,
+        google.maps.event.addListenerOnce(map,
+            'idle',
+            function() {
+                $('.movie').slick('slickNext');
+                $('#heatmap-canvas').addClass('animated bounceInDown');
+            });
+
+        setTimeout(function() {
+            $('#heatmap-canvas').addClass('animated bounceOutUp');
+            setTimeout(fithSlide, 1500);
+            },
             5000);
     }
 

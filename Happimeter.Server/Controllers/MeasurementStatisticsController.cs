@@ -80,12 +80,12 @@ namespace Happimeter.Server.Controllers
             var users = _movieService.GetUsers();
             foreach (var happimeterUserAccount in users)
             {
-                if (false && (happimeterUserAccount.LastSendMovie.Date == DateTime.UtcNow.Date || DateTime.UtcNow.Hour < 17))
+                if ((happimeterUserAccount.LastSendMovie.Date == DateTime.UtcNow.Date || DateTime.UtcNow.Hour < 17))
                 {
                     continue;
                 }
                 var movieData = _movieService.GetMovieData(happimeterUserAccount.Email, DateTime.UtcNow);
-                if (false && !movieData.HasMoodDataToday)
+                if (!movieData.HasMoodDataToday)
                 {
                     continue;
                 }
@@ -95,11 +95,12 @@ namespace Happimeter.Server.Controllers
                     Name = movieData.Name,
                     LinkUrl =
                         "http://happimeter-server.azurewebsites.net/MeasurementStatistics/HappinessMovieEmail?mail=" +
-                        happimeterUserAccount.Email + "&date=" + DateTime.UtcNow.Date + "&uid=" +
+                        happimeterUserAccount.Email + "&date=" + DateTime.UtcNow.Date.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'") + "&uid=" +
                         happimeterUserAccount.Id
                 };
 
                 var body = _emailManager.GetTemplate(MovieEmailViewModel.TemplateKey, model);
+                //todo:replace with user email.
                 var receiverAddressObj = new MailAddress("mariusstein7@gmail.com");
                 var message = new MailMessage
                 {
@@ -110,9 +111,9 @@ namespace Happimeter.Server.Controllers
                     IsBodyHtml = true
                 };
                 _emailManager.Send(message);
+                _movieService.UpdateLastMovieMailSent(happimeterUserAccount);
 
             }
-            var emails = users.Select(x => x.Email);
 
             return null;
         }
