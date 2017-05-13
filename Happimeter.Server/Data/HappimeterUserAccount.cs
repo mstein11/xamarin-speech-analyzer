@@ -11,5 +11,9 @@ namespace Happimeter.Server.Data
 
         public DateTime LastSendMovie { get; set; }
 
+        public DateTime? MovieActiveFrom { get; set; }
+
+        public DateTime? MovieActiveTo { get; set; }
+
     }
 }

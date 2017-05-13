@@ -86,8 +86,10 @@ namespace Happimeter.Server.Services
                 dataPoints.Add(new MovieDataPoint {SensorData = sensorData, MoodData = relatedMood, HeatMapData = heatMapPoint});
             }
 
+            var tmp = mood.Count(x => x.Pleasant > 1);
+
             model.Name = mood.First().Name;
-            model.HappinessRatio = (int) ((double) mood.Count(x => x.Pleasant > 1) / mood.Count * 100);
+            model.HappinessRatio = (int) ((double) dataPoints.Count(x => x.MoodData.Pleasant > 1) / dataPoints.Count() * 100);
             model.NumberLocations = sensor.Count(x => x.GeoLat != null && x.GeoLng != null);
             model.MovieDataPoints = dataPoints;
 

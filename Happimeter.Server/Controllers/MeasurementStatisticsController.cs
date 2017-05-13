@@ -80,10 +80,14 @@ namespace Happimeter.Server.Controllers
             var users = _movieService.GetUsers();
             foreach (var happimeterUserAccount in users)
             {
-                if ((happimeterUserAccount.LastSendMovie.Date == DateTime.UtcNow.Date || DateTime.UtcNow.Hour < 17))
+                if (happimeterUserAccount.MovieActiveFrom == null ||
+                    happimeterUserAccount.MovieActiveFrom > DateTime.UtcNow ||
+                    happimeterUserAccount.MovieActiveTo < DateTime.UtcNow ||
+                    happimeterUserAccount.LastSendMovie.Date == DateTime.UtcNow.Date || DateTime.UtcNow.Hour < 17)
                 {
                     continue;
                 }
+
                 var movieData = _movieService.GetMovieData(happimeterUserAccount.Email, DateTime.UtcNow);
                 if (!movieData.HasMoodDataToday)
                 {
